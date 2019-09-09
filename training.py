@@ -50,14 +50,15 @@ def get_transition_freqs(training_set):
     return probabilities
 
 
-def get_emission_freqs(training_set):
-    dicts = get_transition_counts(training_set)
-    probabilities = {}
+def get_emission_freq():
+    numerator = {}
     for sentence in train:
-        for word in sentence:
+         for word in sentence:
+            numerator.setdefault(word.form, {})
+            numerator[word.form].setdefault(word.upos, 0)
+            numerator[word.form][word.upos] += 1
 
-            numerator = [word.form]
-
+    return numeratorx
 
 UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
 NGRAM = "Lord of the Rings".split()
