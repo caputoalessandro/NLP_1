@@ -27,6 +27,17 @@ def get_transition_counts(training_set):
     return counts
 
 
+def get_emission_counts(training_set):
+    numerator = {}
+    for sentence in training_set:
+        for word in sentence:
+            numerator.setdefault(word.form, {})
+            numerator[word.form].setdefault(word.upos, 0)
+            numerator[word.form][word.upos] += 1
+
+    return numerator
+
+
 def normalize(counts: dict):
     result = {}
     for outer_key, inner_dict in counts.items():
@@ -37,29 +48,6 @@ def normalize(counts: dict):
     return result
 
 
-def get_transition_freqs(training_set):
-    dicts = get_transition_counts(training_set)
-    probabilities = {}
-    for t1, t2 in dicts.items():
-        denom = sum(t2.values())
-        for key in t2:
-            numerator = t2[key]
-            probabilty = numerator / denom
-            probabilities[t1] = t2
-            probabilities[t1][key] = probabilty
-    return probabilities
-
-
-def get_emission_freq():
-    numerator = {}
-    for sentence in train:
-         for word in sentence:
-            numerator.setdefault(word.form, {})
-            numerator[word.form].setdefault(word.upos, 0)
-            numerator[word.form][word.upos] += 1
-
-    return numeratorx
-
 UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
 NGRAM = "Lord of the Rings".split()
 
@@ -69,6 +57,6 @@ train = pyconll.load_from_file(UD_ENGLISH_TRAIN)
 if __name__ == "__main__":
     print(train[0][0].upos)
     print(normalize(get_transition_counts(train)))
-    print(get_transition_freqs(train))
+    print(normalize(get_emission_counts(train)))
     # print(get_emission_freqs(train))
     pass
