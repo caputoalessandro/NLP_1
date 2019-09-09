@@ -1,0 +1,69 @@
+# Make sure 'Lord of the Rings' has 'Lord' and 'Rings' annotated as regular NOUN.
+import pyconll
+import pyconll.util
+import pyconll.load
+import itertools
+
+UD_ENGLISH_TRAIN = './resources/en_partut-ud-train.conllu'
+NGRAM = 'Lord of the Rings'.split()
+
+train = pyconll.load_from_file(UD_ENGLISH_TRAIN)
+
+
+def pairwise(iterator):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterator)
+    next(b, None)
+    return zip(a, b)
+
+
+def get_frequencies():
+    frequencies = {'Q0': {}, 'Qf': {}}
+    for sentence in train:
+        # print(sentence[0].upos)
+        frequencies['Q0'].setdefault(sentence[0].upos, 0)
+        frequencies['Q0'][sentence[0].upos] += 1
+        for t1, t2 in pairwise(sentence):
+            frequencies.setdefault(t1.upos, {})
+            frequencies[t1.upos].setdefault(t2.upos, 0)
+            frequencies[t1.upos][t2.upos] += 1
+        frequencies['Qf'].setdefault(sentence[-1].upos, 0)
+        frequencies['Qf'][sentence[-1].upos] += 1
+    return frequencies
+
+
+def get_transaction_freq():
+    dicts = get_frequencies()
+    probabilities = {}
+    for t1, t2 in dicts.items():
+        denom = sum(t2.values())
+        for key in t2:
+            numerator = t2[key]
+            probabilty = numerator/denom
+            probabilities[t1] = t2
+            probabilities[t1][key] = probabilty
+    return probabilities
+
+def get_emission_freq():
+    dicts = get_frequencies()
+    probabilities = {}
+    for sentence in train:
+        for word in sentence:
+
+            numerator = [word.form]
+
+get_emission_freq()
+
+get_transaction_freq()
+
+# print(get_frequencies())
+# print(train[0][0].upos)
+
+
+
+
+
+
+
+
+
