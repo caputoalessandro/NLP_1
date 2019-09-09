@@ -28,14 +28,14 @@ def get_transition_counts(training_set):
 
 
 def get_emission_counts(training_set):
-    numerator = {}
+    counts = {}
     for sentence in training_set:
         for word in sentence:
-            numerator.setdefault(word.form, {})
-            numerator[word.form].setdefault(word.upos, 0)
-            numerator[word.form][word.upos] += 1
+            counts.setdefault(word.form, {})
+            counts[word.form].setdefault(word.upos, 0)
+            counts[word.form][word.upos] += 1
 
-    return numerator
+    return counts
 
 
 def normalize(counts: dict):
