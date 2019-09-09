@@ -27,6 +27,16 @@ def get_transition_counts(training_set):
     return counts
 
 
+def normalize(counts: dict):
+    result = {}
+    for outer_key, inner_dict in counts.items():
+        denom = sum(inner_dict.values())
+        result[outer_key] = {
+            key: value / denom for key, value in inner_dict.items()
+        }
+    return result
+
+
 def get_transition_freqs(training_set):
     dicts = get_transition_counts(training_set)
     probabilities = {}
@@ -57,6 +67,7 @@ train = pyconll.load_from_file(UD_ENGLISH_TRAIN)
 
 if __name__ == "__main__":
     print(train[0][0].upos)
+    print(normalize(get_transition_counts(train)))
     print(get_transition_freqs(train))
     # print(get_emission_freqs(train))
     pass
