@@ -162,6 +162,8 @@ dmypy.json
 # *.iml
 # *.ipr
 
+.idea/
+
 # CMake
 cmake-build-*/
 
