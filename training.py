@@ -1,6 +1,7 @@
 import itertools
-
-import pyconll.load
+from math import log
+from dataclasses import dataclass
+from typing import Dict
 
 
 def pairwise(iterator):
@@ -15,6 +16,7 @@ def get_transition_counts(training_set):
     un elemento a un altro.
     """
     counts = {"Q0": {}, "Qf": {}}
+
     for sentence in training_set:
         counts["Q0"].setdefault(sentence[0].upos, 0)
         counts["Q0"][sentence[0].upos] += 1
@@ -24,11 +26,13 @@ def get_transition_counts(training_set):
             counts[t1.upos][t2.upos] += 1
         counts["Qf"].setdefault(sentence[-1].upos, 0)
         counts["Qf"][sentence[-1].upos] += 1
+
     return counts
 
 
 def get_emission_counts(training_set):
     counts = {}
+
     for sentence in training_set:
         for word in sentence:
             counts.setdefault(word.form, {})
@@ -41,22 +45,31 @@ def get_emission_counts(training_set):
 def normalize(counts: dict):
     result = {}
     for outer_key, inner_dict in counts.items():
-        denom = sum(inner_dict.values())
+        denom = log(sum(inner_dict.values()))
         result[outer_key] = {
-            key: value / denom for key, value in inner_dict.items()
+            key: log(value) - denom for key, value in inner_dict.items()
         }
     return result
 
 
-UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
-NGRAM = "Lord of the Rings".split()
+@dataclass
+class HMM:
+    transition: Dict[str, Dict[str, float]]
+    emission: Dict[str, Dict[str, float]]
 
-train = pyconll.load_from_file(UD_ENGLISH_TRAIN)
+    @classmethod
+    def train(cls, training_set):
+        return cls(
+            transition=normalize(get_transition_counts(training_set)),
+            emission=normalize(get_emission_counts(training_set)),
+        )
 
 
 if __name__ == "__main__":
-    print(train[0][0].upos)
-    print(normalize(get_transition_counts(train)))
-    print(normalize(get_emission_counts(train)))
-    # print(get_emission_freqs(train))
-    pass
+    import pyconll.load
+
+    UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
+    training_set = pyconll.load_from_file(UD_ENGLISH_TRAIN)
+
+    hmm = HMM.train(training_set)
+    print(hmm)
