@@ -1,13 +1,10 @@
-import itertools
-from math import log
 from dataclasses import dataclass
+from math import log
 from typing import Dict
 
+import pyconll.load
 
-def pairwise(iterator):
-    a, b = itertools.tee(iterator)
-    next(b, None)
-    return zip(a, b)
+__all__ = ["HMM", "hmm_ud_english"]
 
 
 def get_transition_counts(training_set):
@@ -20,7 +17,7 @@ def get_transition_counts(training_set):
     for sentence in training_set:
         counts["Q0"].setdefault(sentence[0].upos, 0)
         counts["Q0"][sentence[0].upos] += 1
-        for t1, t2 in pairwise(sentence):
+        for t1, t2 in zip(sentence, sentence[1:]):
             counts.setdefault(t1.upos, {})
             counts[t1.upos].setdefault(t2.upos, 0)
             counts[t1.upos][t2.upos] += 1
@@ -35,9 +32,9 @@ def get_emission_counts(training_set):
 
     for sentence in training_set:
         for word in sentence:
-            counts.setdefault(word.form, {})
-            counts[word.form].setdefault(word.upos, 0)
-            counts[word.form][word.upos] += 1
+            counts.setdefault(word.upos, {})
+            counts[word.upos].setdefault(word.form, 0)
+            counts[word.upos][word.form] += 1
 
     return counts
 
@@ -65,12 +62,20 @@ class HMM:
         )
 
 
+def hmm_ud_english():
+    training_set = pyconll.load_from_file(
+        "resources/en_partut-ud-train.conllu"
+    )
+    return HMM.train(training_set)
+
 
 if __name__ == "__main__":
-    import pyconll.load
+    import json
+    from dataclasses import asdict
+    from sys import stdout
 
-    UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
-    training_set = pyconll.load_from_file(UD_ENGLISH_TRAIN)
+    def main():
+        hmm = hmm_ud_english()
+        json.dump(asdict(hmm), stdout, indent=4)
 
-    hmm = HMM.train(training_set)
-    print(hmm.emission)
+    main()
