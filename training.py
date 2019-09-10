@@ -42,9 +42,9 @@ def get_emission_counts(training_set):
 def normalize(counts: dict):
     result = {}
     for outer_key, inner_dict in counts.items():
-        denom = log(sum(inner_dict.values()))
+        denom = sum(inner_dict.values())
         result[outer_key] = {
-            key: log(value) - denom for key, value in inner_dict.items()
+            key: value / denom for key, value in inner_dict.items()
         }
     return result
 
