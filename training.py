@@ -1,12 +1,23 @@
 from dataclasses import dataclass
 from typing import Dict
+from toolz.dicttoolz import assoc_in
 
 import pyconll.load
 
 __all__ = ["HMM", "hmm_ud_english"]
 
 
-def get_transition_counts(training_set):
+def normalize(counts: dict):
+    result = {}
+    for outer_key, inner_dict in counts.items():
+        denom = sum(inner_dict.values())
+        result[outer_key] = {
+            key: value / denom for key, value in inner_dict.items()
+        }
+    return result
+
+
+def get_transition_frequencies(training_set):
     """
     Restituisce un dizionario che contiene i conteggi delle transizioni da
     un elemento a un altro.
@@ -25,10 +36,10 @@ def get_transition_counts(training_set):
         counts["Qf"].setdefault(sentence[-1].upos, 0)
         counts["Qf"][sentence[-1].upos] += 1
 
-    return counts
+    return normalize(counts)
 
 
-def get_emission_counts(training_set):
+def get_emission_frequencies(training_set):
     counts = {}
 
     for sentence in training_set:
@@ -39,16 +50,18 @@ def get_emission_counts(training_set):
             counts[word.upos].setdefault(word.form, 0)
             counts[word.upos][word.form] += 1
 
-    return counts
+    return normalize(counts)
 
 
-def normalize(counts: dict):
-    result = {}
-    for outer_key, inner_dict in counts.items():
-        denom = sum(inner_dict.values())
-        result[outer_key] = {
-            key: value / denom for key, value in inner_dict.items()
-        }
+def invert(frequencies):
+    result = {
+        word: {} for words in frequencies.values() for word in words.keys()
+    }
+
+    for pos, words in frequencies.items():
+        for word, p in words.items():
+            result[word][pos] = p
+
     return result
 
 
@@ -60,8 +73,8 @@ class HMM:
     @classmethod
     def train(cls, training_set):
         return cls(
-            transition=normalize(get_transition_counts(training_set)),
-            emission=normalize(get_emission_counts(training_set)),
+            transition=get_transition_frequencies(training_set),
+            emission=invert(get_emission_frequencies(training_set)),
         )
 
 
