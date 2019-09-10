@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from math import log
 from typing import Dict
 
 import pyconll.load
@@ -18,6 +17,8 @@ def get_transition_counts(training_set):
         counts["Q0"].setdefault(sentence[0].upos, 0)
         counts["Q0"][sentence[0].upos] += 1
         for t1, t2 in zip(sentence, sentence[1:]):
+            if None in (t1.upos, t2.upos):
+                continue
             counts.setdefault(t1.upos, {})
             counts[t1.upos].setdefault(t2.upos, 0)
             counts[t1.upos][t2.upos] += 1
@@ -32,6 +33,8 @@ def get_emission_counts(training_set):
 
     for sentence in training_set:
         for word in sentence:
+            if word.upos is None:
+                continue
             counts.setdefault(word.upos, {})
             counts[word.upos].setdefault(word.form, 0)
             counts[word.upos][word.form] += 1
