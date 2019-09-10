@@ -1,26 +1,11 @@
-import pyconll.load
-import numpy as np
-from training import HMM
 from pprint import pprint
-from sentences import tokenized_sentences
 
+from training import HMM
 
-UD_ENGLISH_TRAIN = "./resources/en_partut-ud-train.conllu"
-training_set = pyconll.load_from_file(UD_ENGLISH_TRAIN)
-
-hmm = HMM.train(training_set)
-
-sentences = [
-    "The black droid then lowers Vader's mask and helmet onto his head"
-    "These are not the droids your looking for"
-    "Your friends may escape, but you are doomed"
-]
-
-
-matrix = {}
 
 def viterbi(hmm: HMM, sen: str):
     # inizializzo la matrice
+    matrix = {}
     emissions = hmm.emission
     transations = hmm.transition
     tokens = sen.split(" ")
@@ -38,6 +23,10 @@ def viterbi(hmm: HMM, sen: str):
 
 
 if __name__ == "__main__":
+    from training import hmm_ud_english
+    from sentences import tokenized_sentences as sentences
+
+    hmm = hmm_ud_english()
     viterbi(hmm, sentences[0])
 
 #
