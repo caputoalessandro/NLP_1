@@ -65,6 +65,7 @@ class HMM:
         )
 
 
+
 if __name__ == "__main__":
     import pyconll.load
 
@@ -72,4 +73,4 @@ if __name__ == "__main__":
     training_set = pyconll.load_from_file(UD_ENGLISH_TRAIN)
 
     hmm = HMM.train(training_set)
-    print(hmm)
+    print(hmm.emission)

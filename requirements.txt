@@ -1,1 +1,3 @@
 pyconll
+numpy
+pytest
