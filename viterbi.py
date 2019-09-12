@@ -1,25 +1,67 @@
 from pprint import pprint
+from typing import List
 
 from training import HMM
 
 
-def viterbi(hmm: HMM, sen: str):
-    # inizializzo la matrice
+def make_default_emissions(pos_list):
+
+    vit = {pos: 1 / len(pos_list) for pos in pos_list}
+
+    vit["PROPN"] = 1
+
+    return vit
+
+
+def viterbi(hmm: HMM, tokens: List[str]):
+
+    default_emissions = make_default_emissions(hmm.transition.keys())
     matrix = {}
     emissions = hmm.emission
-    transations = hmm.transition
-    tokens = sen.split(" ")
-    for word in tokens:
-        if word in emissions:
-            print(transations)
-            pos = emissions.get(word)
-            print("we", pos)
-            for p in pos:
-                emission = emissions[word][p]
-                transation = transations["Q0"][p]
-                matrix.setdefault(word, {})
-                matrix[word][p] = emission * transation
-    pprint(matrix)
+    transitions = hmm.transition
+    # pprint(emissions)
+
+    for pos, val in emissions.get(tokens[0], default_emissions).items():
+        print(default_emissions)
+        print("primo caso")
+        print(tokens[0])
+        emission = val
+        transition = transitions['Q0'][pos]
+        matrix.setdefault(tokens[0], {})
+        matrix[tokens[0]][pos] = emission * transition
+    backpointer = tokens[0]
+
+    for token in tokens[1:-1]:
+        print("caso generale")
+        for pos, val in emissions.get(token, default_emissions).items():
+            print("cosa  strana", emissions.get(token, default_emissions).items() )
+            max = -1000
+            max_pos = "NOMAX?"
+            for last_pos in matrix.get(backpointer):
+                emission = val
+                last_val = matrix[backpointer][last_pos]
+                print("pos",token,pos)
+                print("last_pos",backpointer,last_pos)
+                transition = transitions[pos][last_pos]
+                ris = emission * transition * last_val
+                if max < ris:
+                    max = ris
+                    max_pos = pos
+            matrix.setdefault(token, {})
+            matrix[token][max_pos] = max
+        backpointer = token
+
+    max = -1000
+    for last_ris in matrix.get(backpointer):
+        print("caso finale")
+        transition = transitions['Qf'][max_pos]
+        ris = transition * last_ris
+        if max < ris:
+            max = ris
+    matrix.setdefault(token, {})
+    matrix[token]["Qf"] = max
+
+    print(matrix)
 
 
 if __name__ == "__main__":
@@ -29,50 +71,15 @@ if __name__ == "__main__":
     hmm = hmm_ud_english()
     viterbi(hmm, sentences[0])
 
-#
-#
-# emissions = hmm.emission
-#   transitions = hmm.transition
-#   tokens = sentence.split(" ")
-#   ris = []
-#   matrix = {}
-#
-#   # for word in emissions:
-#   #     if tokens[0] in word:
-#   word = tokens[0]
-#   if word in emissions:
-#       for pos, val in emissions[word].items():
-#           transition = transitions["Q0"][pos]
-#           emission = val
-#           matrix.setdefault(word, {})
-#           matrix[word].setdefault(pos, 0)
-#           matrix[word][pos] = emission * transition
-#           previus_word = word
-#           #print(matrix)
-#   else if
-#   for word in tokens[1:-2]:
-#       # for word in emissions:
-#       #     if token in word:
-#       max_val = 0
-#       max_pos = " "
-#       if word in emissions:
-#           for pos, val in emissions[word].items():
-#               for previus_pos in matrix[previus_word]:
-#                   emission = val
-#                   transition = transitions[previus_pos][pos]
-#                   ris_val = emission * transition * matrix[previus_word][previus_pos]
-#                   ris.append(ris_val)
-#                   if ris_val > 0: max_pos = pos, max_value = ris_val
-#           matrix.setdefault(word, {})
-#           matrix[word].setdefault(max_pos, 0)
-#           matrix[word][max_pos] = max_val
-#           previus_word = word
-#           print(matrix)
-#
-#   for pos in emissions:
-#       if tokens[-1] in pos:
-#           emission = pos[tokens[-1]]
-#           matrix[tokens[-1]][pos] = emission * transition
-#           previus_word = tokens[-1]
-#
-#   return matrix.values()
+# else:
+#     if pos is "PROPN":
+#         print("we")
+#         emission = 1
+#         transation = transations["Q0"][pos]
+#         matrix.setdefault(pos, {})
+#         matrix[pos][token] = emission * transation
+#     else:
+#         emission = 1 / emissions.__len__()
+#         transation = transations["Q0"][pos]
+#         matrix.setdefault(pos, {})
+#         matrix[pos][token] = emission * transation
