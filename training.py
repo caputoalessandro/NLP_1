@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Dict
-from toolz.dicttoolz import assoc_in
 
 import pyconll.load
 
@@ -22,7 +21,7 @@ def get_transition_frequencies(training_set):
     Restituisce un dizionario che contiene i conteggi delle transizioni da
     un elemento a un altro.
     """
-    counts = {"Q0": {}, "Qf": {}}
+    counts = {"Q0": {}}
 
     for sentence in training_set:
         counts["Q0"].setdefault(sentence[0].upos, 0)
@@ -33,8 +32,8 @@ def get_transition_frequencies(training_set):
             counts.setdefault(t1.upos, {})
             counts[t1.upos].setdefault(t2.upos, 0)
             counts[t1.upos][t2.upos] += 1
-        counts["Qf"].setdefault(sentence[-1].upos, 0)
-        counts["Qf"][sentence[-1].upos] += 1
+        counts[sentence[-1].upos].setdefault("Qf", 0)
+        counts[sentence[-1].upos]["Qf"] += 1
 
     return normalize(counts)
 
