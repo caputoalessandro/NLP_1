@@ -1,0 +1,136 @@
+# The black droid then lowers Vader's mask and helmet onto his head.
+
+the:
+  pos: DET
+
+black:
+  pos: ADJ
+
+droid:
+  pos: NOUN
+  forms:
+    singular: droid
+    plural: droids
+
+then:
+  pos: ADV
+
+lower:
+  pos: VERB
+  forms:
+    present:
+      - lower
+      - lower
+      - lowers
+      - lower
+      - lower
+      - lower
+    infinitive: lower
+
+mask:
+  pos: NOUN
+  forms:
+    singular: mask
+    plural: masks
+
+and:
+  pos: CCONJ
+
+helmet:
+  pos: NOUN
+  forms:
+    singular: helmet
+    plural: helmets
+
+onto:
+  pos: ADP
+
+his:
+  pos: DET
+
+head:
+  pos: NOUN
+  forms:
+    singular: head
+    plural: heads
+
+# These are not the droids you're looking for.
+
+these:
+  pos: PRON
+
+# TODO forme abbreviate
+
+be:
+  pos: VERB
+  forms:
+    present:
+      - am
+      - are
+      - is
+      - are
+      - are
+      - are
+    infinitive: be
+
+not:
+  pos: ADV
+
+you:
+  pos: PRON
+
+look:
+  pos: VERB
+  forms:
+    present:
+      - look
+      - look
+      - looks
+      - look
+      - look
+      - look
+    infinitive: look
+    gerund: looking
+
+for:
+  pos: ADV
+
+your:
+  pos: DET
+
+friend:
+  pos: NOUN
+  forms:
+    singular: friend
+    plural: friends
+
+may:
+  pos: AUX
+
+escape:
+  pos: VERB
+  forms:
+    present:
+      - escape
+      - escape
+      - escapes
+      - escape
+      - escape
+      - escape
+    infinitive: escape
+
+but:
+  pos: CCONJ
+
+doom:
+  pos: VERB
+  forms:
+    present:
+      - doom
+      - doom
+      - dooms
+      - doom
+      - doom
+      - doom
+    infinitive: doom
+    pastparticiple: doomed

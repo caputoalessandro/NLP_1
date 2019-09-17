@@ -1,0 +1,123 @@
+
+il:
+  pos: DET
+  plural: i
+
+nero:
+  pos: ADJ
+
+droide:
+  pos: NOUN
+  plural: droidi
+
+poi:
+  pos: ADV
+
+abbassare:
+  pos: VERB
+  present:
+    - abbasso
+    - abbassi
+    - abbassa
+    - abbassiamo
+    - abbassate
+    - abbassano
+
+maschera:
+  pos: NOUN
+  plural: maschere
+
+e:
+  pos: CCONJ
+
+elmetto:
+  pos: NOUN
+  plural: elmetti
+
+sul:
+  pos: DET
+  fem: sulla
+
+suo:
+  pos: DET
+  fem: sua
+
+testa:
+  pos: NOUN
+  plural: teste
+
+questi:
+  pos: PRON
+  fem: queste
+
+essere:
+  pos: VERB
+  present:
+    - sono
+    - sei
+    - è
+    - siamo
+    - siete
+    - sono
+
+non:
+  pos: ADV
+
+tu:
+  pos: PRON
+
+cercare:
+  pos: VERB
+  present:
+    - cerco
+    - cerchi
+    - cerca
+    - cerchiamo
+    - cercate
+    - cercano
+  gerund: cercando
+
+per:
+  pos: ADV
+
+tuo:
+  pos: DET
+  plural: tuoi
+
+amico:
+  pos: NOUN
+  plural: amici
+
+potere:
+  pos: AUX
+  present:
+    - posso
+    - puoi
+    - può
+    - possiamo
+    - potete
+    - possono
+
+fuggire:
+  pos: VERB
+  present:
+    - fuggo
+    - fuggi
+    - fugge
+    - fuggiamo
+    - fuggete
+    - fuggono
+
+ma:
+  pos: CCONJ
+
+condannare:
+  pos: VERB
+  present:
+    - condanno
+    - condanni
+    - condanna
+    - condanniamo
+    - condannate
+    - condannano
+  pastparticiple: condannato
