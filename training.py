@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict
+from math import log
 
 import pyconll.load
 
@@ -11,7 +12,7 @@ def normalize(counts: dict):
     for outer_key, inner_dict in counts.items():
         denom = sum(inner_dict.values())
         result[outer_key] = {
-            key: value / denom for key, value in inner_dict.items()
+            key: log(value) - log(denom) for key, value in inner_dict.items()
         }
     return result
 
