@@ -1,3 +1,6 @@
+from typing import List
+
+
 def _deepkeys(previous_keys, obj):
 
     if isinstance(obj, dict):
@@ -14,3 +17,4 @@ def _deepkeys(previous_keys, obj):
 
 def deepkeys(obj):
     yield from _deepkeys((), obj)
+
