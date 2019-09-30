@@ -1,29 +1,23 @@
 from typing import List
 
-from pos_tagger import PosTagger
-from training import HMM
+from tagger.abc import PosTagger
+from tagger.hmm import HMM
 from pprint import pprint
 
 
 def make_default_emissions(pos_list):
-
     # vit = {pos: 1 / len(pos_list) for pos in pos_list}
-
     vit = {}
-
     vit["PROPN"] = 1
-
     return vit
 
 
 class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
-        self.transition = hmm.transition
-        self.emission = hmm.emission
+        self.hmm = hmm
 
     def pos_tag(self, tokens: List[str]):
-        emissions = self.emission
-        transitions = self.transition
+        transitions, emissions = self.hmm
         default_emissions = make_default_emissions(transitions.keys())
 
         # pprint(transitions)
@@ -74,9 +68,13 @@ class ViterbiTagger(PosTagger):
         # print(emissions.get(tokens[0]).values())
 
 
+def ud_viterbi_tagger():
+    return ViterbiTagger(hmm_ud_english())
+
+
 if __name__ == "__main__":
-    from training import hmm_ud_english
+    from tagger.hmm import hmm_ud_english
     from sentences import tokenized_sentences as sentences
 
-    tagger = ViterbiTagger(hmm_ud_english())
+    tagger = ud_viterbi_tagger()
     tagger.pos_tag(sentences[1])

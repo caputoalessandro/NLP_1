@@ -1,6 +1,6 @@
-from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, NamedTuple
 from math import log
+from resources import ud_treebank
 
 import pyconll.load
 
@@ -65,33 +65,17 @@ def invert(frequencies):
     return result
 
 
-@dataclass
-class HMM:
-    transition: Dict[str, Dict[str, float]]
-    emission: Dict[str, Dict[str, float]]
+class HMM(NamedTuple):
+    transitions: Dict[str, Dict[str, float]]
+    emissions: Dict[str, Dict[str, float]]
 
-    @classmethod
-    def train(cls, training_set):
-        return cls(
-            transition=get_transition_frequencies(training_set),
-            emission=invert(get_emission_frequencies(training_set)),
-        )
+
+def train_from_conll(training_set):
+    return HMM(
+        transitions=get_transition_frequencies(training_set),
+        emissions=invert(get_emission_frequencies(training_set)),
+    )
 
 
 def hmm_ud_english():
-    training_set = pyconll.load_from_file(
-        "resources/en_partut-ud-train.conllu"
-    )
-    return HMM.train(training_set)
-
-
-if __name__ == "__main__":
-    import json
-    from dataclasses import asdict
-    from sys import stdout
-
-    def main():
-        hmm = hmm_ud_english()
-        json.dump(asdict(hmm), stdout, indent=4)
-
-    main()
+    return train_from_conll(ud_treebank("train"))

@@ -1,7 +1,8 @@
 import pyconll
 from typing import Mapping, List
-from collections import defaultdict, Counter
-from pos_tagger import PosTagger
+from collections import defaultdict
+from tagger.abc import PosTagger
+from resources import ud_treebank
 
 
 class BaselineTagger(PosTagger):
@@ -12,19 +13,16 @@ class BaselineTagger(PosTagger):
         return [self.model[tok] for tok in tokens]
 
 
-def most_frequent_pos_for_forms(counts: Mapping[str, Counter]):
+def most_frequent_pos_for_forms(counts: Mapping[str, Mapping[str, int]]):
     return {
-        form: pos_counts.most_common(1)[0][0]
+        form: max(pos_counts.keys(), key=lambda pos: pos_counts[pos])
         for form, pos_counts in counts.items()
     }
 
 
 def ud_baseline_tagger():
-    training_set = pyconll.load_from_file(
-        "resources/en_partut-ud-train.conllu"
-    )
-
-    counts = defaultdict(Counter)
+    training_set = ud_treebank("train")
+    counts = defaultdict(lambda: defaultdict(lambda: 0))
 
     for sentence in training_set:
         for token in sentence:

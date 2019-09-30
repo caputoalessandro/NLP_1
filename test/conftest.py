@@ -1,4 +1,4 @@
-from training import hmm_ud_english
+from tagger.hmm import hmm_ud_english
 import pytest
 
 

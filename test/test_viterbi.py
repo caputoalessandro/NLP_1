@@ -1,6 +1,6 @@
 import pytest
 
-from viterbi import viterbi
+from tagger.viterbi_tagger import viterbi
 from sentences import tokenized_sentences
 
 

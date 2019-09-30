@@ -1,5 +1,8 @@
 # The black droid then lowers Vader's mask and helmet onto his head.
 
+__genitive__:
+  pos: X
+
 the:
   pos: DET
 
