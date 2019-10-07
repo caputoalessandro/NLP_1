@@ -1,5 +1,4 @@
 from typing import List
-
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
 from pprint import pprint
@@ -19,10 +18,11 @@ class ViterbiTagger(PosTagger):
     def pos_tag(self, tokens: List[str]):
         transitions, emissions = self.hmm
         default_emissions = make_default_emissions(transitions.keys())
-
+        dict_to_add = {}
         # pprint(transitions)
         # pprint(emissions)
 
+        # prima parole
         viterbi_matrix = [
             {
                 pos: em_value * transitions["Q0"][pos]
@@ -31,41 +31,52 @@ class ViterbiTagger(PosTagger):
                 ).items()
             }
         ]
-        pprint(viterbi_matrix)
 
-        for token in tokens[1:]:
+
+        # parole centrali
+        for token in tokens[1:-1]:
+
             previus_column = len(viterbi_matrix) - 1
 
-            for previus_pos, previus_value in viterbi_matrix[
-                previus_column
-            ].items():
+            for pos, em_value in emissions.get(
+                token, default_emissions
+            ).items():
 
-                viterbi_matrix = [
-                    {
-                        pos: em_value
+                to_add = [
+                    (
+                        pos,
+                        em_value
                         * transitions[previus_pos][pos]
                         * previus_value
-                        for pos, em_value in emissions.get(
-                            token, default_emissions
-                        ).items()
-                    }
+                    )
+                    for previus_pos, previus_value in viterbi_matrix[
+                        previus_column
+                    ].items()
                 ]
 
-        # viterbi_matrix = [
-        #     {
-        #         pos: em_value * transitions[previus_pos][pos] * previus_value
-        #         for pos, em_value in emissions.get(token, default_emissions).items()  # transition_qualcosa
-        #     }
-        # ]
+                # print("to_add", to_add)
 
-        # pprint(transitions)
-        # pprint(emissions)
-        # for value in transitions.get["Qf"]("NOUN") : print(value)
-        # for key,value in emissions.get(tokens[0]).items() : print(key,value)
-        # pprint(transitions)
-        # print(transitions["X"]["ADJ"])
-        # for value in emissions.get(tokens[0]).values(): print(value)
-        # print(emissions.get(tokens[0]).values())
+                value_to_add = max(to_add, key=lambda x: x[1])
+
+                # print("value  to add ", value_to_add)
+
+                dict_to_add[value_to_add[0]] = value_to_add[1]
+
+            viterbi_matrix.append(dict_to_add)
+
+            dict_to_add = {}
+
+        # ultima parola
+        to_add = {
+            pos: em_value * transitions[pos]["Qf"]
+            for pos, em_value in emissions.get(
+                tokens[-1], default_emissions
+            ).items()
+        }
+
+        viterbi_matrix.append(to_add)
+
+        pprint(viterbi_matrix)
 
 
 def ud_viterbi_tagger():
