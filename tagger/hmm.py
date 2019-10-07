@@ -1,8 +1,7 @@
-from typing import Dict, NamedTuple
 from math import log
-from resources import ud_treebank
+from typing import Dict, NamedTuple
 
-import pyconll.load
+from resources import ud_treebank
 
 __all__ = ["HMM", "hmm_ud_english"]
 

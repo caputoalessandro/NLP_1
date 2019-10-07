@@ -1,8 +1,9 @@
-import pyconll
-from typing import Mapping, List
 from collections import defaultdict
-from tagger.abc import PosTagger
+from typing import Mapping, List
+
 from resources import ud_treebank
+from tagger.abc import PosTagger
+from utils import DictWithMissing
 
 
 class BaselineTagger(PosTagger):
@@ -10,14 +11,16 @@ class BaselineTagger(PosTagger):
         self.model: Mapping[str, str] = model
 
     def pos_tag(self, tokens: List[str]):
-        return [self.model[tok] for tok in tokens]
+        return [(tok, self.model[tok]) for tok in tokens]
 
 
-def most_frequent_pos_for_forms(counts: Mapping[str, Mapping[str, int]]):
-    return {
-        form: max(pos_counts.keys(), key=lambda pos: pos_counts[pos])
+def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
+    model = DictWithMissing(
+        (form, max(pos_counts.keys(), key=lambda pos: pos_counts[pos]))
         for form, pos_counts in counts.items()
-    }
+    )
+    model.missing = 'PROPN'
+    return model
 
 
 def ud_baseline_tagger():
@@ -28,5 +31,6 @@ def ud_baseline_tagger():
         for token in sentence:
             counts[token.form][token.upos] += 1
 
-    model = most_frequent_pos_for_forms(counts)
+    model = create_baseline_model(counts)
     return BaselineTagger(model)
+
