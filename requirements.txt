@@ -1,2 +1,4 @@
 pyconll
 pytest
+pyyaml
+toolz

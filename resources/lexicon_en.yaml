@@ -22,12 +22,14 @@ lower:
   pos: VERB
   forms:
     present:
-      - lower
-      - lower
-      - lowers
-      - lower
-      - lower
-      - lower
+      singular:
+        - lower
+        - lower
+        - lowers
+      plural:
+        - lower
+        - lower
+        - lower
     infinitive: lower
 
 mask:
@@ -59,8 +61,11 @@ head:
 
 # These are not the droids you're looking for.
 
-these:
+this:
   pos: PRON
+  forms:
+    singular: this
+    plural: these
 
 # TODO forme abbreviate
 
@@ -68,12 +73,14 @@ be:
   pos: VERB
   forms:
     present:
-      - am
-      - are
-      - is
-      - are
-      - are
-      - are
+      singular:
+        - am
+        - are
+        - is
+      plural:
+        - are
+        - are
+        - are
     infinitive: be
 
 not:
@@ -86,12 +93,14 @@ look:
   pos: VERB
   forms:
     present:
-      - look
-      - look
-      - looks
-      - look
-      - look
-      - look
+      singular:
+        - look
+        - look
+        - looks
+      plural:
+        - look
+        - look
+        - look
     infinitive: look
     gerund: looking
 
@@ -114,12 +123,14 @@ escape:
   pos: VERB
   forms:
     present:
-      - escape
-      - escape
-      - escapes
-      - escape
-      - escape
-      - escape
+      singular:
+        - escape
+        - escape
+        - escapes
+      plural:
+        - escape
+        - escape
+        - escape
     infinitive: escape
 
 but:
@@ -129,11 +140,13 @@ doom:
   pos: VERB
   forms:
     present:
-      - doom
-      - doom
-      - dooms
-      - doom
-      - doom
-      - doom
+      singular:
+        - doom
+        - doom
+        - dooms
+      plural:
+        - doom
+        - doom
+        - doom
     infinitive: doom
     pastparticiple: doomed

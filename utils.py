@@ -1,8 +1,4 @@
-from collections import UserDict
-from typing import List, Any, Callable, Hashable
-
-
-def _deepkeys(previous_keys, obj):
+def _deepitems(previous_keys, obj):
 
     if isinstance(obj, dict):
         keys = obj.keys()
@@ -13,11 +9,11 @@ def _deepkeys(previous_keys, obj):
         return
 
     for key in keys:
-        yield from _deepkeys(previous_keys + (key,), obj[key])
+        yield from _deepitems(previous_keys + (key,), obj[key])
 
 
-def deepkeys(obj):
-    yield from _deepkeys((), obj)
+def deepitems(obj):
+    yield from _deepitems((), obj)
 
 
 class DictWithMissing(dict):
