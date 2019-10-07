@@ -24,11 +24,11 @@ def get_transition_frequencies(training_set):
     counts = {"Q0": {}}
 
     for sentence in training_set:
+        sentence = [word for word in sentence if not word.is_multiword()]
+
         counts["Q0"].setdefault(sentence[0].upos, 0)
         counts["Q0"][sentence[0].upos] += 1
         for t1, t2 in zip(sentence, sentence[1:]):
-            if None in (t1.upos, t2.upos):
-                continue
             counts.setdefault(t1.upos, {})
             counts[t1.upos].setdefault(t2.upos, 0)
             counts[t1.upos][t2.upos] += 1
