@@ -9,5 +9,7 @@ def test_performance():
     baseline_performance = tagger_performance(baseline)
     print(f"Baseline: {baseline_performance}")
     viterbi_performance = tagger_performance(viterbi)
+    print(f"Viterbi: {viterbi_performance}")
+
 
     assert baseline_performance < viterbi_performance
