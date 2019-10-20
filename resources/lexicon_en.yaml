@@ -88,6 +88,15 @@ not:
 
 you:
   pos: PRON
+  forms:
+    singular:
+      - me
+      - you
+      - he
+    plural:
+      - we
+      - you
+      - they
 
 look:
   pos: VERB

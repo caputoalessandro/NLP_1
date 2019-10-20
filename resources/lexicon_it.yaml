@@ -116,6 +116,15 @@ non:
 
 tu:
   pos: PRON
+  forms:
+    singular:
+      - io
+      - tu
+      - lui
+    plural:
+      - noi
+      - voi
+      - loro
 
 cercare:
   pos: VERB
