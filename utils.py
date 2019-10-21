@@ -1,3 +1,24 @@
+from toolz.curried import map, mapcat, curry
+
+
+@curry
+def emap(fn, seq):
+    """
+    Versione eager di toolz.curried.map. Applica la funzione a ogni elemento della lista
+    e restituisce una lista contente i risultati.
+    """
+    return list(map(fn, seq))
+
+
+@curry
+def emapcat(fn, seq):
+    """
+    Versione eager di toolz.curried.mapcat. Applica la funzione a ogni elemento della lista
+    e restituisce una lista contenente i risultati concatenati tra loro.
+    """
+    return list(mapcat(fn, seq))
+
+
 def _deepitems(previous_keys, obj):
 
     if isinstance(obj, dict):

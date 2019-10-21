@@ -1,10 +1,9 @@
-from pprint import pprint
 from typing import NamedTuple, Set, List
 
-from toolz.curried import groupby, map, mapcat, pipe
+from toolz.curried import groupby, pipe
 
 from resources import lexicon_data, lemma_translations
-from utils import deepitems
+from utils import deepitems, emap, emapcat
 
 
 class Form(NamedTuple):
@@ -77,20 +76,19 @@ class DirectTranslator:
         ]
 
     def translate_multiform(self, multiform):
-        return list(mapcat(self.translate_form, multiform))
+        return emapcat(self.translate_form, multiform)
 
     def translate(self, tokens: List[str]):
-        result = pipe(
+        translated_forms = pipe(
             tokens,
             expand_multiwords,
-            map(self.find_english_forms),
-            list,
-            map(self.translate_multiform),
-            list
+            emap(self.find_english_forms),
+            emap(self.translate_multiform),
         )
 
-        pprint(result)
-        print()
+        from pprint import pprint
+
+        pprint(translated_forms)
 
 
 if __name__ == "__main__":
