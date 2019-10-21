@@ -20,7 +20,7 @@ def unknown_form(token):
 MULTIWORDS = {("'", "re"): "are", ("'", "s"): "__genitive__"}
 
 
-def expand_multiwords(tokens: List[str]):
+def expand_abbreviations(tokens: List[str]):
     expanded = [tokens[0]]
 
     for token in tokens[1:]:
@@ -48,6 +48,27 @@ def lexicon_forms(lang: str) -> List[Form]:
     return forms
 
 
+def coordinate_by_unambiguous(multiforms):
+    current_features = set()
+    result = []
+
+    for multiform in multiforms:
+        if len(multiform) == 1:
+            current_features = multiform[0].features
+            result.append(multiform[:])
+            continue
+
+        filtered_multiform = [
+            form
+            for form in multiform
+            if current_features.issubset(form.features)
+        ]
+
+        result.append(filtered_multiform)
+
+    return result
+
+
 class DirectTranslator:
     def __init__(self):
         self.english_tok_to_forms = groupby(
@@ -58,12 +79,12 @@ class DirectTranslator:
         )
         self.en_to_it = lemma_translations()
 
-    def find_english_forms(self, token):
+    def find_multiforms_for_token(self, token):
         return self.english_tok_to_forms.get(
             token.lower(), [unknown_form(token)]
         )
 
-    def translate_form(self, form):
+    def translate_form_to_it(self, form):
         try:
             italian_lemma = self.en_to_it[form.lemma]
         except KeyError:
@@ -75,15 +96,19 @@ class DirectTranslator:
             if form.features.issubset(it_form.features)
         ]
 
-    def translate_multiform(self, multiform):
-        return emapcat(self.translate_form, multiform)
+    def translate_multiform_to_it(self, multiform):
+        return emapcat(self.translate_form_to_it, multiform)
 
     def translate(self, tokens: List[str]):
         translated_forms = pipe(
             tokens,
-            expand_multiwords,
-            emap(self.find_english_forms),
-            emap(self.translate_multiform),
+            expand_abbreviations,
+            emap(self.find_multiforms_for_token),
+            emap(self.translate_multiform_to_it),
+            reversed,
+            coordinate_by_unambiguous,
+            reversed,
+            list,
         )
 
         from pprint import pprint
