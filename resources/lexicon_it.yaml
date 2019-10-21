@@ -181,8 +181,9 @@ fuggire:
         - fugge
       plural:
         - fuggiamo
-        - fuggete
+        - fuggite
         - fuggono
+    infinitive: fuggire
 
 ma:
   pos: CCONJ

@@ -1,8 +1,9 @@
-from typing import NamedTuple, Set, List
+from typing import NamedTuple, Dict, List
 
 from toolz.curried import groupby, pipe
 
 from resources import lexicon_data, lemma_translations
+from translate.features import make_feature_dict, compatible_features
 from utils import deepitems, emap, emapcat
 
 
@@ -10,11 +11,11 @@ class Form(NamedTuple):
     token: str
     lemma: str
     pos: str
-    features: Set[str]
+    features: Dict[str, str]
 
 
 def unknown_form(token):
-    return Form(token, token, "?", set())
+    return Form(token, token, "?", {})
 
 
 MULTIWORDS = {("'", "re"): "are", ("'", "s"): "__genitive__"}
@@ -39,10 +40,10 @@ def lexicon_forms(lang: str) -> List[Form]:
 
     for lemma_id, lemma_data in lexicon_data(lang).items():
         if "forms" not in lemma_data:
-            forms.append(Form(lemma_id, lemma_id, lemma_data["pos"], set()))
+            forms.append(Form(lemma_id, lemma_id, lemma_data["pos"], {}))
             continue
         for form_key, token in deepitems(lemma_data["forms"]):
-            features = set(form_key)
+            features = make_feature_dict(form_key)
             forms.append(Form(token, lemma_id, lemma_data["pos"], features))
 
     return forms
@@ -84,7 +85,7 @@ class DirectTranslator:
             token.lower(), [unknown_form(token)]
         )
 
-    def translate_form_to_it(self, form):
+    def translate_form_to_it(self, form: Form):
         try:
             italian_lemma = self.en_to_it[form.lemma]
         except KeyError:
@@ -93,7 +94,7 @@ class DirectTranslator:
         return [
             it_form
             for it_form in self.italian_lemma_to_forms[italian_lemma]
-            if form.features.issubset(it_form.features)
+            if compatible_features(form.features, it_form.features)
         ]
 
     def translate_multiform_to_it(self, multiform):
