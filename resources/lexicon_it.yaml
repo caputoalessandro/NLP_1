@@ -1,7 +1,7 @@
-di:
+- lemma: di
   pos: X
 
-il:
+- lemma: il
   pos: DET
   forms:
     masc:
@@ -11,7 +11,7 @@ il:
       singular: la
       plural: le
 
-nero:
+- lemma: nero
   pos: ADJ
   forms:
     masc:
@@ -21,17 +21,17 @@ nero:
       singular: nera
       plural: nere
 
-droide:
+- lemma: droide
   pos: NOUN
   forms:
     masc:
       singular: droide
       plural: droidi
 
-poi:
+- lemma: poi
   pos: ADV
 
-abbassare:
+- lemma: abbassare
   pos: VERB
   forms:
     present:
@@ -44,24 +44,24 @@ abbassare:
         - abbassate
         - abbassano
 
-maschera:
+- lemma: maschera
   pos: NOUN
   forms:
     fem:
       singular: maschera
       plural: maschere
 
-e:
+- lemma: e
   pos: CCONJ
 
-elmetto:
+- lemma: elmetto
   pos: NOUN
   forms:
     masc:
       singular: elmetto
       plural: elmetti
 
-sul:
+- lemma: sul
   pos: DET
   forms:
     masc:
@@ -71,7 +71,7 @@ sul:
       singular: sulla
       plural: sulle
 
-suo:
+- lemma: suo
   pos: DET
   forms:
     masc:
@@ -81,14 +81,14 @@ suo:
       singular: sua
       plural: sue
 
-testa:
+- lemma: testa
   pos: NOUN
   forms:
     fem:
       singular: testa
       plural: teste
 
-questo:
+- lemma: questo
   pos: PRON
   forms:
     masc:
@@ -98,7 +98,7 @@ questo:
       singular: questa
       plural: queste
 
-essere:
+- lemma: essere
   pos: VERB
   forms:
     present:
@@ -111,10 +111,10 @@ essere:
         - siete
         - sono
 
-non:
+- lemma: non
   pos: ADV
 
-tu:
+- lemma: tu
   pos: PRON
   forms:
     singular:
@@ -126,7 +126,7 @@ tu:
       - voi
       - loro
 
-cercare:
+- lemma: cercare
   pos: VERB
   forms:
     present:
@@ -140,15 +140,15 @@ cercare:
         - cercano
     gerund: cercando
 
-per:
+- lemma: per
   pos: ADV
 
-tuo:
+- lemma: tuo
   pos: DET
   forms:
     plural: tuoi
 
-amico:
+- lemma: amico
   pos: NOUN
   forms:
     masc:
@@ -158,7 +158,7 @@ amico:
       singular: amica
       plural: amiche
 
-potere:
+- lemma: potere
   pos: AUX
   forms:
     present:
@@ -171,7 +171,7 @@ potere:
         - potete
         - possono
 
-fuggire:
+- lemma: fuggire
   pos: VERB
   forms:
     present:
@@ -185,10 +185,10 @@ fuggire:
         - fuggono
     infinitive: fuggire
 
-ma:
+- lemma: ma
   pos: CCONJ
 
-condannare:
+- lemma: condannare
   pos: VERB
   forms:
     present:

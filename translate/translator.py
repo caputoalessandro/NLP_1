@@ -14,6 +14,9 @@ class Form(NamedTuple):
     features: Dict[str, str]
 
 
+Multiform = List[Form]
+
+
 def unknown_form(token):
     return Form(token, token, "?", {})
 
@@ -38,19 +41,22 @@ def expand_abbreviations(tokens: List[str]):
 def lexicon_forms(lang: str) -> List[Form]:
     forms = []
 
-    for lemma_id, lemma_data in lexicon_data(lang).items():
-        if "forms" not in lemma_data:
-            forms.append(Form(lemma_id, lemma_id, lemma_data["pos"], {}))
+    for form_data in lexicon_data(lang):
+        lemma = form_data["lemma"]
+        pos = form_data["pos"]
+
+        if "forms" not in form_data:
+            forms.append(Form(lemma, lemma, pos, {}))
             continue
-        for form_key, token in deepitems(lemma_data["forms"]):
+        for form_key, token in deepitems(form_data["forms"]):
             features = make_feature_dict(form_key)
-            forms.append(Form(token, lemma_id, lemma_data["pos"], features))
+            forms.append(Form(token, lemma, pos, features))
 
     return forms
 
 
-def coordinate_by_unambiguous(multiforms):
-    current_features = set()
+def coordinate_by_unambiguous(multiforms: List[Multiform]):
+    current_features = dict()
     result = []
 
     for multiform in multiforms:
@@ -62,7 +68,9 @@ def coordinate_by_unambiguous(multiforms):
         filtered_multiform = [
             form
             for form in multiform
-            if current_features.issubset(form.features)
+            if compatible_features(
+                current_features, form.features, exclude=["time"]
+            )
         ]
 
         result.append(filtered_multiform)
@@ -97,7 +105,7 @@ class DirectTranslator:
             if compatible_features(form.features, it_form.features)
         ]
 
-    def translate_multiform_to_it(self, multiform):
+    def translate_multiform_to_it(self, multiform: Multiform):
         return emapcat(self.translate_form_to_it, multiform)
 
     def translate(self, tokens: List[str]):

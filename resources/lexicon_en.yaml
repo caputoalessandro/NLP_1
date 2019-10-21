@@ -1,24 +1,24 @@
 # The black droid then lowers Vader's mask and helmet onto his head.
 
-__genitive__:
+- lemma: __genitive__
   pos: X
 
-the:
+- lemma: the
   pos: DET
 
-black:
+- lemma: black
   pos: ADJ
 
-droid:
+- lemma: droid
   pos: NOUN
   forms:
     singular: droid
     plural: droids
 
-then:
+- lemma: then
   pos: ADV
 
-lower:
+- lemma: lower
   pos: VERB
   forms:
     present:
@@ -32,28 +32,28 @@ lower:
         - lower
     infinitive: lower
 
-mask:
+- lemma: mask
   pos: NOUN
   forms:
     singular: mask
     plural: masks
 
-and:
+- lemma: and
   pos: CCONJ
 
-helmet:
+- lemma: helmet
   pos: NOUN
   forms:
     singular: helmet
     plural: helmets
 
-onto:
+- lemma: onto
   pos: ADP
 
-his:
+- lemma: his
   pos: DET
 
-head:
+- lemma: head
   pos: NOUN
   forms:
     singular: head
@@ -61,7 +61,7 @@ head:
 
 # These are not the droids you're looking for.
 
-this:
+- lemma: this
   pos: PRON
   forms:
     singular: this
@@ -69,7 +69,7 @@ this:
 
 # TODO forme abbreviate
 
-be:
+- lemma: be
   pos: VERB
   forms:
     present:
@@ -83,10 +83,10 @@ be:
         - are
     infinitive: be
 
-not:
+- lemma: not
   pos: ADV
 
-you:
+- lemma: you
   pos: PRON
   forms:
     singular:
@@ -98,7 +98,7 @@ you:
       - you
       - they
 
-look:
+- lemma: look
   pos: VERB
   forms:
     present:
@@ -113,22 +113,22 @@ look:
     infinitive: look
     gerund: looking
 
-for:
+- lemma: for
   pos: ADV
 
-your:
+- lemma: your
   pos: DET
 
-friend:
+- lemma: friend
   pos: NOUN
   forms:
     singular: friend
     plural: friends
 
-may:
+- lemma: may
   pos: AUX
 
-escape:
+- lemma: escape
   pos: VERB
   forms:
     present:
@@ -142,10 +142,10 @@ escape:
         - escape
     infinitive: escape
 
-but:
+- lemma: but
   pos: CCONJ
 
-doom:
+- lemma: doom
   pos: VERB
   forms:
     present:
