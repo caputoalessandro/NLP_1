@@ -1,38 +1,13 @@
-from typing import NamedTuple, Dict, List
+from typing import List
 
 from toolz.curried import groupby, pipe
 
 from resources import lexicon_data, lemma_translations
-from tagger import ud_viterbi_tagger, TaggedToken, PosTagger
+from tagger import ud_viterbi_tagger, PosTagger
+from translate.data import Form, Multiform
+from translate.disambiguate import coordinate_by_unambiguous, disambiguate_aux_verb, disambiguate_be_when_gerund
 from translate.features import make_feature_dict, compatible_features
 from utils import deepitems, emap, emapcat
-
-
-class Form(NamedTuple):
-    token: str
-    lemma: str
-    pos: str
-    features: Dict[str, str]
-
-
-Multiform = List[Form]
-
-
-MULTIWORDS = {("'", "re"): "are", ("'", "s"): "'s"}
-
-
-def expand_abbreviations(tokens: List[str]):
-    expanded = [tokens[0]]
-
-    for token in tokens[1:]:
-        multiword = MULTIWORDS.get((expanded[-1], token))
-        if multiword:
-            expanded.pop()
-            expanded.append(multiword)
-        else:
-            expanded.append(token)
-
-    return expanded
 
 
 def lexicon_forms(lang: str) -> List[Form]:
@@ -50,29 +25,6 @@ def lexicon_forms(lang: str) -> List[Form]:
             forms.append(Form(token, lemma, pos, features))
 
     return forms
-
-
-def coordinate_by_unambiguous(multiforms: List[Multiform]):
-    current_features = dict()
-    result = []
-
-    for multiform in multiforms:
-        if len(multiform) == 1:
-            current_features = multiform[0].features
-            result.append(multiform[:])
-            continue
-
-        filtered_multiform = [
-            form
-            for form in multiform
-            if compatible_features(
-                current_features, form.features, exclude=["time"]
-            )
-        ]
-
-        result.append(filtered_multiform)
-
-    return result
 
 
 class DirectTranslator:
@@ -111,7 +63,6 @@ class DirectTranslator:
     def translate(self, tokens: List[str]):
         translated_forms = pipe(
             tokens,
-            expand_abbreviations,
             self.tagger.pos_tag,
             emap(self.find_multiforms_for_token),
             emap(self.translate_multiform_to_it),
@@ -119,6 +70,8 @@ class DirectTranslator:
             coordinate_by_unambiguous,
             reversed,
             list,
+            disambiguate_aux_verb,
+            disambiguate_be_when_gerund
         )
 
         from pprint import pprint

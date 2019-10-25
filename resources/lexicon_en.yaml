@@ -69,6 +69,30 @@
 
 # TODO forme abbreviate
 
+- lemma: be_abbrev
+  pos: VERB
+  present:
+    singular:
+      - "'m"
+      - "'re"
+      - "'s"
+    plural:
+      - "'re"
+      - "'re"
+      - "'re"
+
+- lemma: be_abbrev
+  pos: AUX
+  present:
+    singular:
+      - "'m"
+      - "'re"
+      - "'s"
+    plural:
+      - "'re"
+      - "'re"
+      - "'re"
+
 - lemma: be
   pos: VERB
   forms:

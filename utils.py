@@ -8,6 +8,28 @@ def listify(obj: Union[T, List[T]]) -> List[T]:
     return obj if isinstance(obj, list) else [obj]
 
 
+def subdict_matches(matchee: dict, matcher: dict):
+
+    if matcher.keys() > matchee.keys():
+        return False
+
+    for key in matcher.keys():
+
+        if key not in matchee:
+            return False
+
+        elif isinstance(matcher[key], dict):
+            if not isinstance(matchee[key], dict):
+                return False
+            if not subdict_matches(matchee[key], matcher[key]):
+                return False
+
+        elif matcher[key] != matchee[key]:
+            return False
+
+    return True
+
+
 @curry
 def emap(fn, seq):
     """
