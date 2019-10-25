@@ -1,7 +1,7 @@
 # The black droid then lowers Vader's mask and helmet onto his head.
 
-- lemma: __genitive__
-  pos: X
+- lemma: "'s"
+  pos: PART
 
 - lemma: the
   pos: DET
@@ -83,8 +83,22 @@
         - are
     infinitive: be
 
+- lemma: be
+  pos: AUX
+  forms:
+    present:
+      singular:
+        - am
+        - are
+        - is
+      plural:
+        - are
+        - are
+        - are
+    infinitive: be
+
 - lemma: not
-  pos: ADV
+  pos: PART
 
 - lemma: you
   pos: PRON
@@ -114,7 +128,7 @@
     gerund: looking
 
 - lemma: for
-  pos: ADV
+  pos: ADP
 
 - lemma: your
   pos: DET

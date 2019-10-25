@@ -3,6 +3,7 @@ from typing import NamedTuple, Dict, List
 from toolz.curried import groupby, pipe
 
 from resources import lexicon_data, lemma_translations
+from tagger import ud_viterbi_tagger, TaggedToken, PosTagger
 from translate.features import make_feature_dict, compatible_features
 from utils import deepitems, emap, emapcat
 
@@ -17,11 +18,7 @@ class Form(NamedTuple):
 Multiform = List[Form]
 
 
-def unknown_form(token):
-    return Form(token, token, "?", {})
-
-
-MULTIWORDS = {("'", "re"): "are", ("'", "s"): "__genitive__"}
+MULTIWORDS = {("'", "re"): "are", ("'", "s"): "'s"}
 
 
 def expand_abbreviations(tokens: List[str]):
@@ -79,28 +76,31 @@ def coordinate_by_unambiguous(multiforms: List[Multiform]):
 
 
 class DirectTranslator:
-    def __init__(self):
+    def __init__(self, tagger: PosTagger):
         self.english_tok_to_forms = groupby(
-            lambda x: x.token, lexicon_forms("en")
+            lambda x: (x.token, x.pos), lexicon_forms("en")
         )
         self.italian_lemma_to_forms = groupby(
-            lambda x: x.lemma, lexicon_forms("it")
+            lambda x: (x.lemma, x.pos), lexicon_forms("it")
         )
         self.en_to_it = lemma_translations()
+        self.tagger = tagger
 
-    def find_multiforms_for_token(self, token):
+    def find_multiforms_for_token(self, tagged_token):
+        token, pos = tagged_token
         return self.english_tok_to_forms.get(
-            token.lower(), [unknown_form(token)]
+            (token.lower(), pos), [Form(token, token, pos, {})]
         )
 
     def translate_form_to_it(self, form: Form):
         try:
-            italian_lemma = self.en_to_it[form.lemma]
+            italian_lemmas = self.en_to_it[form.lemma, form.pos]
         except KeyError:
             return [form]
 
         return [
             it_form
+            for italian_lemma in italian_lemmas
             for it_form in self.italian_lemma_to_forms[italian_lemma]
             if compatible_features(form.features, it_form.features)
         ]
@@ -112,6 +112,7 @@ class DirectTranslator:
         translated_forms = pipe(
             tokens,
             expand_abbreviations,
+            self.tagger.pos_tag,
             emap(self.find_multiforms_for_token),
             emap(self.translate_multiform_to_it),
             reversed,
@@ -125,9 +126,15 @@ class DirectTranslator:
         pprint(translated_forms)
 
 
-if __name__ == "__main__":
+def main():
     from sentences import tokenized_sentences
 
-    translator = DirectTranslator()
-    for sentence in tokenized_sentences:
-        translator.translate(sentence)
+    tagger = ud_viterbi_tagger()
+    translator = DirectTranslator(tagger)
+
+    for tokens in tokenized_sentences:
+        translator.translate(tokens)
+
+
+if __name__ == "__main__":
+    main()

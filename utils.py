@@ -1,4 +1,11 @@
+from typing import TypeVar, List, Union
 from toolz.curried import map, mapcat, curry
+
+T = TypeVar("T")
+
+
+def listify(obj: Union[T, List[T]]) -> List[T]:
+    return obj if isinstance(obj, list) else [obj]
 
 
 @curry

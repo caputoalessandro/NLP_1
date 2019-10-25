@@ -1,5 +1,5 @@
 - lemma: di
-  pos: X
+  pos: PART
 
 - lemma: il
   pos: DET
@@ -111,8 +111,35 @@
         - siete
         - sono
 
+- lemma: essere
+  pos: AUX
+  forms:
+    present:
+      singular:
+        - sono
+        - sei
+        - è
+      plural:
+        - siamo
+        - siete
+        - sono
+
+- lemma: stare
+  pos: AUX
+  forms:
+    present:
+      singular:
+        - sto
+        - stai
+        - sta
+      plural:
+        - stiamo
+        - state
+        - stanno
+    infinitive: stare
+
 - lemma: non
-  pos: ADV
+  pos: PART
 
 - lemma: tu
   pos: PRON
@@ -141,7 +168,7 @@
     gerund: cercando
 
 - lemma: per
-  pos: ADV
+  pos: ADP
 
 - lemma: tuo
   pos: DET
