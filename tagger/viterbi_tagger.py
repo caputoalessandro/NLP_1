@@ -129,4 +129,4 @@ def ud_viterbi_tagger():
 if __name__ == "__main__":
 
     tagger = ud_viterbi_tagger()
-    tagger.pos_tag(sentences[1])
+    tagger.pos_tag(sentences[0])
