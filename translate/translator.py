@@ -1,12 +1,13 @@
 from typing import List
 
-from toolz.curried import groupby, pipe
+from toolz.curried import groupby, pipe, concat
 
 from resources import lexicon_data, lemma_translations
 from tagger import ud_viterbi_tagger, PosTagger
 from translate.data import Form, Multiform
-from translate.disambiguate import coordinate_by_unambiguous, disambiguate_aux_verb, disambiguate_be_when_gerund
+from translate.disambiguate import disambiguate
 from translate.features import make_feature_dict, compatible_features
+from translate.oracle_tagger import OmniscentTagger
 from utils import deepitems, emap, emapcat
 
 
@@ -66,12 +67,9 @@ class DirectTranslator:
             self.tagger.pos_tag,
             emap(self.find_multiforms_for_token),
             emap(self.translate_multiform_to_it),
-            reversed,
-            coordinate_by_unambiguous,
-            reversed,
-            list,
-            disambiguate_aux_verb,
-            disambiguate_be_when_gerund
+            disambiguate,
+            concat,
+            list
         )
 
         from pprint import pprint
@@ -82,11 +80,15 @@ class DirectTranslator:
 def main():
     from sentences import tokenized_sentences
 
-    tagger = ud_viterbi_tagger()
-    translator = DirectTranslator(tagger)
+    viterbi_tagger = ud_viterbi_tagger()
+    viterbi_translator = DirectTranslator(viterbi_tagger)
+    omniscent_translator = DirectTranslator(OmniscentTagger())
 
     for tokens in tokenized_sentences:
-        translator.translate(tokens)
+        print("--- VITERBI ---")
+        viterbi_translator.translate(tokens)
+        print("--- OMNISCENT ---")
+        omniscent_translator.translate(tokens)
 
 
 if __name__ == "__main__":

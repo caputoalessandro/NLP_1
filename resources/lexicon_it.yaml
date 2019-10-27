@@ -173,7 +173,12 @@
 - lemma: tuo
   pos: DET
   forms:
-    plural: tuoi
+    masc:
+      singular: tuo
+      plural: tuoi
+    fem:
+      singular: tua
+      plural: tue
 
 - lemma: amico
   pos: NOUN

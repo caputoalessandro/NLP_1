@@ -1,5 +1,5 @@
 from translate.translator import Form
-from translate.pos_reordering import splitter_function
+from translate.omniscent_tagger import splitter_function
 
 def test_reordering():
 
