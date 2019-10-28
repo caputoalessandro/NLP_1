@@ -1,4 +1,5 @@
 from typing import List
+from translate.data import Form
 from pprint import pprint
 
 
@@ -19,8 +20,8 @@ def splitter_function(forms : List):
     return reordered_sentence
 
 
-def pos_reordering(forms: List):
-
+def pos_reordering(forms: List[Form]):
+    forms = forms.copy()
     reordered_sentence = [forms[0]]
     forms.remove(forms[0])
 

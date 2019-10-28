@@ -7,7 +7,8 @@ from tagger import ud_viterbi_tagger, PosTagger
 from translate.data import Form, Multiform
 from translate.disambiguate import disambiguate
 from translate.features import make_feature_dict, compatible_features
-from translate.oracle_tagger import OmniscentTagger
+from translate.pos_reordering import pos_reordering
+from translate.omniscent_tagger import OmniscentTagger
 from utils import deepitems, emap, emapcat
 
 
@@ -69,7 +70,8 @@ class DirectTranslator:
             emap(self.translate_multiform_to_it),
             disambiguate,
             concat,
-            list
+            list,
+            pos_reordering,
         )
 
         from pprint import pprint
