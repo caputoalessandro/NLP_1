@@ -20,6 +20,7 @@ def pos_reordering(forms: List[Form]):
         forms[initial_range:]
     )
 
+    # pprint(reordered_sentence)
     return reordered_sentence
 
 
@@ -34,7 +35,7 @@ def pos_reordering_local(forms: List[Form]):
             reordered_sentence[-1].pos == "DET"
             or reordered_sentence[-1].pos == "VERB"
         ):
-            chosen_form = list(filter(lambda x: x.pos == "NOUN", forms))
+            chosen_form = list(filter(lambda x: x.pos == "NOUN" and x.features, forms))
             if chosen_form:
                 reordered_sentence.append(chosen_form[0])
                 forms.remove(chosen_form[0])
@@ -43,8 +44,8 @@ def pos_reordering_local(forms: List[Form]):
                 reordered_sentence.append(forms[0])
                 forms.remove(forms[0])
 
-        elif reordered_sentence[-1].pos == "NOUN":
-            chosen_form = list(filter(lambda x: x.pos == "X", forms))
+        elif reordered_sentence[-1].pos == "NOUN" or reordered_sentence[-1].pos == "PRON":
+            chosen_form = list(filter(lambda x: x.pos == "PART", forms))
             if chosen_form:
                 reordered_sentence.append(chosen_form[0])
                 forms.remove(chosen_form[0])
