@@ -32,8 +32,6 @@ def perfection(forms: List[Form]):
         elif current_form.pos == "VERB" and next_form.pos == "ADP":
             forms.remove(next_form)
 
-    phrase = [form.token for form in forms]
-
-    return phrase
+    return forms
 
 

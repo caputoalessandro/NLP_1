@@ -73,7 +73,7 @@ class DirectTranslator:
             concat,
             list,
             pos_reordering,
-            perfection,
+            perfection
         )
 
         from pprint import pprint
@@ -89,11 +89,10 @@ def main():
     omniscent_translator = DirectTranslator(OmniscentTagger())
 
     for tokens in tokenized_sentences:
-        # print("--- VITERBI ---")
+        print("--- VITERBI ---")
         viterbi_translator.translate(tokens)
-
-        # print("--- OMNISCENT ---")
-        # omniscent_translator.translate(tokens)
+        print("--- OMNISCENT ---")
+        omniscent_translator.translate(tokens)
 
 
 if __name__ == "__main__":
