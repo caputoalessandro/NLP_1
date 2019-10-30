@@ -50,3 +50,9 @@ tagged_sentences = [
 ]
 
 tokenized_sentences = [tokenize(s) for s in sentences]
+
+translated_sentences = [
+    "Il droide nero poi abbassa la maschera e l'elmetto di Vader sulla sua testa.",
+    "Questi non sono i droidi che stai cercando.",
+    "I tuoi amici possono fuggire, ma tu sei condannato.",
+]
