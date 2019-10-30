@@ -8,6 +8,7 @@ from translate.data import Form, Multiform
 from translate.disambiguate import disambiguate
 from translate.features import make_feature_dict, compatible_features
 from translate.pos_reordering import pos_reordering
+from translate.perfection import perfection
 from translate.omniscent_tagger import OmniscentTagger
 from utils import deepitems, emap, emapcat
 
@@ -72,6 +73,7 @@ class DirectTranslator:
             concat,
             list,
             pos_reordering,
+            perfection,
         )
 
         from pprint import pprint
@@ -87,10 +89,11 @@ def main():
     omniscent_translator = DirectTranslator(OmniscentTagger())
 
     for tokens in tokenized_sentences:
-        print("--- VITERBI ---")
+        # print("--- VITERBI ---")
         viterbi_translator.translate(tokens)
-        print("--- OMNISCENT ---")
-        omniscent_translator.translate(tokens)
+
+        # print("--- OMNISCENT ---")
+        # omniscent_translator.translate(tokens)
 
 
 if __name__ == "__main__":

@@ -7,13 +7,6 @@ from tagger.hmm import hmm_ud_english
 from sentences import tokenized_sentences as sentences
 
 
-def make_default_emissions(pos_list):
-    # vit = {pos: 1 / len(pos_list) for pos in pos_list}
-    vit = {}
-    vit["PROPN"] = 1
-    return vit
-
-
 class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
@@ -33,21 +26,6 @@ class ViterbiTagger(PosTagger):
                 ).items()
             }
         ]
-
-        # add_to_path = [
-        #     (
-        #         pos,
-        #         1.0
-        #         * transitions.get("Q0", {}).get(pos, 0)
-        #     )
-        #     for pos, em_value in emissions.get(
-        #         tokens[0], default_emissions
-        #     ).items()
-        # ]
-
-        # pos_to_add = max(add_to_path, key=lambda x: x[1])
-        # tuple_to_add = (tokens[0], pos_to_add[0])
-        # backpointer.append("start")
 
         # parole centrali
         for token in tokens[1:]:
