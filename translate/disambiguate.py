@@ -5,7 +5,7 @@ from toolz import compose_left
 
 from translate.data import Multiform
 from translate.features import compatible_features
-from utils import subdict_matches
+from utils import emap
 
 """
 Le regole di disambiguazione funzionano con l'assunzione che il POS tag in ogni Form di una
@@ -13,7 +13,7 @@ Multiform sia sempre lo stesso.
 """
 
 
-def disambiguate_aux_verb(multiforms: List[Multiform]):
+def assume_verb_time_if_previous_form_is_aux(multiforms: List[Multiform]):
     result = [multiforms[0]]
 
     for multiform, next_multiform in zip(multiforms, multiforms[1:]):
@@ -30,7 +30,7 @@ def disambiguate_aux_verb(multiforms: List[Multiform]):
     return result
 
 
-def disambiguate_be_when_gerund(multiforms: List[Multiform]):
+def assume_be_stare_if_next_form_gerund(multiforms: List[Multiform]):
     result = []
 
     for multiform, next_multiform in zip(multiforms, multiforms[1:]):
@@ -51,7 +51,7 @@ def disambiguate_be_when_gerund(multiforms: List[Multiform]):
     return result
 
 
-def disambiguate_you_singular(multiforms: List[Multiform]):
+def assume_you_singular(multiforms: List[Multiform]):
     result = []
     for multiform in multiforms:
         if all(form.lemma == "tu" for form in multiform):
@@ -64,7 +64,7 @@ def disambiguate_you_singular(multiforms: List[Multiform]):
     return result
 
 
-def disambiguate_verb_when_pronoun(multiforms: List[Multiform]):
+def coordinate_verb_with_pronoun(multiforms: List[Multiform]):
     result = deepcopy(multiforms)
     for i, multiform in enumerate(multiforms):
         if all(form.pos == "PRON" for form in multiform):
@@ -112,26 +112,17 @@ def coordinate_det_with_next_noun(multiforms: List[Multiform]):
     return result
 
 
-def disambiguate_last_resort(multiforms: List[Multiform]):
-    return [[multiform[0]] for multiform in multiforms]
+@emap
+def assume_first_form(multiform: Multiform):
+    return [multiform[0]]
 
 
-def multiform_query(multiform: Multiform, q: dict):
-    return [form for form in multiform if subdict_matches(form._asdict(), q)]
-
-
-def assume_third_person_if_no_pronoun(multiforms: List[Multiform]):
-    result = []
-
-    for multiform in multiforms:
-        if multiform[0].pos == "VERB" and len(multiform) > 1:
-            multiform = [
-                form for form in multiform if form.features["person"] == 2
-            ]
-
-        result.append(multiform)
-
-    return result
+@emap
+def assume_third_person_if_no_pronoun(multiform: Multiform):
+    if multiform[0].pos == "VERB" and len(multiform) > 1:
+        return [form for form in multiform if form.features["person"] == 2]
+    else:
+        return multiform
 
 
 def coordinate_by_unambiguous(multiforms: List[Multiform]):
@@ -158,40 +149,36 @@ def coordinate_by_unambiguous(multiforms: List[Multiform]):
     return result
 
 
-def assume_masc(multiforms: List[Multiform]):
-    result = []
-    for multiform in multiforms:
-        if any(
-            form.features.get("gender") == "masc" for form in multiform
-        ) and any(form.features.get("gender") == "fem" for form in multiform):
-            multiform = [
-                form for form in multiform if form.features["gender"] == "masc"
-            ]
-        result.append(multiform)
-    return result
+@emap
+def assume_masc(multiform: Multiform):
+    if any(
+        form.features.get("gender") == "masc" for form in multiform
+    ) and any(form.features.get("gender") == "fem" for form in multiform):
+        return [
+            form for form in multiform if form.features["gender"] == "masc"
+        ]
+    else:
+        return multiform
 
 
-def assume_third_person(multiforms: List[Multiform]):
-    result = []
-    for multiform in multiforms:
-        if len(multiform) > 1 and multiform[0].pos == "AUX":
-            multiform = [
-                form
-                for form in multiform
-                if form.features.get("person", 2) == 2
-            ]
-        result.append(multiform)
-    return result
+@emap
+def assume_third_person(multiform: Multiform):
+    if len(multiform) > 1 and multiform[0].pos == "AUX":
+        return [
+            form for form in multiform if form.features.get("person", 2) == 2
+        ]
+    else:
+        return multiform
 
 
-def coordinate_aux_with_previous_noun(multiforms: List[Multiform]):
+def coordinate_verb_with_subject(multiforms: List[Multiform]):
     result = []
     for i, multiform in enumerate(multiforms):
-        if multiform[0].pos == "AUX" and len(multiform) > 1:
+        if multiform[0].pos in ("VERB", "AUX") and len(multiform) > 1:
             prev_noun = next(
                 multiform
                 for multiform in multiforms[i::-1]
-                if multiform[0].pos == "NOUN"
+                if multiform[0].pos in ("NOUN", "PRON")
             )
             multiform = [
                 form
@@ -207,13 +194,13 @@ def coordinate_aux_with_previous_noun(multiforms: List[Multiform]):
 
 disambiguate = compose_left(
     coordinate_by_unambiguous,
-    disambiguate_aux_verb,
-    disambiguate_be_when_gerund,
-    disambiguate_you_singular,
-    disambiguate_verb_when_pronoun,
+    assume_verb_time_if_previous_form_is_aux,
+    assume_be_stare_if_next_form_gerund,
+    assume_you_singular,
+    coordinate_verb_with_pronoun,
     assume_masc,
     assume_third_person,
     coordinate_det_with_next_noun,
-    coordinate_aux_with_previous_noun,
-    disambiguate_last_resort
+    coordinate_verb_with_subject,
+    assume_first_form,
 )
