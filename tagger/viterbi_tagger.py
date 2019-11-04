@@ -1,10 +1,10 @@
 from typing import List
+
+from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
-from pprint import pprint
-from tagger.smoothing import smoothing
 from tagger.hmm import hmm_ud_english
-from sentences import tokenized_sentences as sentences
+from tagger.smoothing import smoothing
 
 
 class ViterbiTagger(PosTagger):
@@ -92,7 +92,7 @@ class ViterbiTagger(PosTagger):
         # tuple_to_add = (tokens[-1], pos_to_add[0])
         # print(pos_to_add)
         backpointer.append(pos_to_add[0])
-        res = list(zip(tokens,backpointer))
+        res = list(zip(tokens, backpointer))
         print(res)
         # print(backpointer)
         # print(tokens)

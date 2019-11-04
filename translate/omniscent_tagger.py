@@ -1,7 +1,7 @@
 from typing import List
 
 from tagger.abc import PosTagger, TaggedToken
-from sentences import tagged_sentences, tokenized_sentences
+from resources import tagged_sentences, tokenized_sentences
 
 
 class OmniscentTagger(PosTagger):

@@ -1,5 +1,4 @@
 from resources import ud_treebank
-from pyconll.unit import Sentence
 
 
 def smoothing():
@@ -7,14 +6,13 @@ def smoothing():
     development_set = ud_treebank("dev")
     smoothing_dict = {}
     count_dict = {}
-    single_words = 0
 
     # conto occorrenze parole
     for sentence in development_set:
         for word in sentence:
             # if not word.is_multiword():
-                count_dict.setdefault(word.form, 0)
-                count_dict[word.form] += 1
+            count_dict.setdefault(word.form, 0)
+            count_dict[word.form] += 1
 
     # conto quante volte occorre un pos solo per le parole cche appaiono una volta
     for sentence in development_set:
@@ -28,9 +26,6 @@ def smoothing():
 
     # calcolo le probabilità dividendo per il numero di parole singole
     for key, value in smoothing_dict.items():
-        smoothing_dict[key] = value/single_words
+        smoothing_dict[key] = value / single_words
     # print(smoothing_dict)
     return smoothing_dict
-
-if __name__ == "__main__":
-    smoothing()

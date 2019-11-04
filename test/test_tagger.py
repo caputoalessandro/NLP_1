@@ -1,7 +1,7 @@
 import pytest
 from pprint import pprint
 from tagger.evaluation import tagger_performance
-from sentences import tokenized_sentences
+from resources import tokenized_sentences
 
 
 def test_performance(baseline_tagger, viterbi_tagger):

@@ -2,7 +2,7 @@ from typing import List
 
 from toolz.curried import groupby, pipe, concat, reduce
 
-from resources import lexicon_data, lemma_translations
+from resources import lexicon_data, lemma_translations, tokenized_sentences
 from tagger import ud_viterbi_tagger, PosTagger
 from translate.data import Form, Multiform
 from translate.disambiguate import disambiguate
@@ -90,8 +90,6 @@ class DirectTranslator:
 
 
 def main():
-    from sentences import tokenized_sentences
-
     viterbi_tagger = ud_viterbi_tagger()
     viterbi_translator = DirectTranslator(viterbi_tagger)
     omniscent_translator = DirectTranslator(OmniscentTagger())
