@@ -1,15 +1,15 @@
 from typing import List
 
-from toolz.curried import groupby, pipe, concat
+from toolz.curried import groupby, pipe, concat, reduce
 
 from resources import lexicon_data, lemma_translations
 from tagger import ud_viterbi_tagger, PosTagger
 from translate.data import Form, Multiform
 from translate.disambiguate import disambiguate
 from translate.features import make_feature_dict, compatible_features
-from translate.pos_reordering import pos_reordering
-from translate.perfection import perfection
 from translate.omniscent_tagger import OmniscentTagger
+from translate.perfection import perfection
+from translate.pos_reordering import pos_reordering
 from utils import deepitems, emap, emapcat
 
 
@@ -28,6 +28,16 @@ def lexicon_forms(lang: str) -> List[Form]:
             forms.append(Form(token, lemma, pos, features))
 
     return forms
+
+
+def join_form_to_sentence(sentence: str, form):
+    no_space = len(sentence) == 0 or sentence[-1] == "'" or form.pos == "PUNCT"
+    sep = "" if no_space else " "
+    return sep.join((sentence, form.token))
+
+
+def forms_to_sentence(forms: List[Form]) -> str:
+    return reduce(join_form_to_sentence, forms, "")
 
 
 class DirectTranslator:
@@ -64,7 +74,7 @@ class DirectTranslator:
         return emapcat(self.translate_form_to_it, multiform)
 
     def translate(self, tokens: List[str]):
-        translated_forms = pipe(
+        return pipe(
             tokens,
             self.tagger.pos_tag,
             emap(self.find_multiforms_for_token),
@@ -73,12 +83,10 @@ class DirectTranslator:
             concat,
             list,
             pos_reordering,
-            perfection
+            perfection,
+            forms_to_sentence,
+            lambda sentence: sentence[0].upper() + sentence[1:],
         )
-
-        from pprint import pprint
-
-        pprint(translated_forms)
 
 
 def main():
@@ -90,9 +98,9 @@ def main():
 
     for tokens in tokenized_sentences:
         print("--- VITERBI ---")
-        viterbi_translator.translate(tokens)
+        print(viterbi_translator.translate(tokens))
         print("--- OMNISCENT ---")
-        omniscent_translator.translate(tokens)
+        print(omniscent_translator.translate(tokens))
 
 
 if __name__ == "__main__":
