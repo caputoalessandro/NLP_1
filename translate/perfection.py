@@ -1,37 +1,33 @@
 from typing import List
 from translate.data import Form
-from itertools import  tee
-
-
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
 
 
 def perfection(forms: List[Form]):
+    result = [forms[0]]
 
-    for current_form, next_form in pairwise(forms):
-
+    for current_form, next_form in zip(forms, forms[1:]):
         if current_form.pos == "VERB" and next_form.pos == "NOUN":
-            index = forms.index(next_form)
-            form = Form(token='la', lemma='la', pos='X', features={'gender': 'fem', 'qty': 'singular'})
-            forms.insert(index, form)
-
+            result.append(
+                Form(
+                    token="la",
+                    lemma="la",
+                    pos="X",
+                    features={"gender": "fem", "qty": "singular"},
+                )
+            )
         elif current_form.pos == "CCONJ" and next_form.pos == "NOUN":
-            index = forms.index(next_form)
-            form = Form(token='l', lemma='l', pos='PART', features={'gender': 'masc', 'qty': 'singular'})
-            forms.insert(index, form)
-
+            result.append(
+                Form(
+                    token="l",
+                    lemma="l",
+                    pos="PART",
+                    features={"gender": "masc", "qty": "singular"},
+                )
+            )
         elif current_form.pos == "NOUN" and next_form.pos == "PRON":
-            index = forms.index(next_form)
-            form = Form(token='che', lemma='che', pos='X', features={})
-            forms.insert(index, form)
+            result.append(Form(token="che", lemma="che", pos="X", features={}))
 
-        elif current_form.pos == "VERB" and next_form.pos == "ADP":
-            forms.remove(next_form)
+        if not (current_form.pos == "VERB" and next_form.pos == "ADP"):
+            result.append(next_form)
 
-    return forms
-
-
+    return result
