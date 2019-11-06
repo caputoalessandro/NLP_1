@@ -14,7 +14,7 @@ def smoothing():
             count_dict.setdefault(word.form, 0)
             count_dict[word.form] += 1
 
-    # conto quante volte occorre un pos solo per le parole cche appaiono una volta
+    # conto quante volte occorre un pos solo per le parole che appaiono una volta
     for sentence in development_set:
         for word in sentence:
             if count_dict[word.form] == 1 and not word.is_multiword():

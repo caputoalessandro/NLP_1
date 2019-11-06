@@ -62,7 +62,6 @@ class ViterbiTagger(PosTagger):
 
             viterbi_matrix.append(dict_to_add)
             pos_to_add = max(add_to_path, key=lambda x: x[1])
-            # tuple_to_add = (token, pos_to_add[0])
             backpointer.append(pos_to_add[0])
             dict_to_add = {}
 
@@ -78,7 +77,6 @@ class ViterbiTagger(PosTagger):
         value_to_add = max(to_add, key=lambda x: x[1])
         dict_to_add[value_to_add[0]] = value_to_add[1]
         viterbi_matrix.append(to_add)
-        # print(viterbi_matrix)
 
         add_to_path = [
             (
@@ -89,14 +87,9 @@ class ViterbiTagger(PosTagger):
         ]
 
         pos_to_add = max(add_to_path, key=lambda x: x[1])
-        # tuple_to_add = (tokens[-1], pos_to_add[0])
-        # print(pos_to_add)
         backpointer.append(pos_to_add[0])
         res = list(zip(tokens, backpointer))
-        print(res)
-        # print(backpointer)
-        # print(tokens)
-        # pprint(viterbi_matrix)
+
         return res
 
 
