@@ -1,5 +1,4 @@
 from typing import Dict, NamedTuple
-import math
 
 from resources import ud_treebank
 
@@ -11,11 +10,8 @@ def normalize(counts: dict):
     for outer_key, inner_dict in counts.items():
         denom = sum(inner_dict.values())
         result[outer_key] = {
-            key: math.log(value) - math.log(denom) for key, value in inner_dict.items()
+            key: value / denom for key, value in inner_dict.items()
         }
-        # result[outer_key] = {
-        #     key: value / denom for key, value in inner_dict.items()
-        # }
     return result
 
 
