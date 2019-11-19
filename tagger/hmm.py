@@ -1,6 +1,7 @@
 from typing import Dict, NamedTuple
 
 from resources import ud_treebank
+from tagger.smoothing import smoothing
 
 __all__ = ["HMM", "hmm_ud_english"]
 
@@ -66,14 +67,16 @@ def invert(frequencies):
 class HMM(NamedTuple):
     transitions: Dict[str, Dict[str, float]]
     emissions: Dict[str, Dict[str, float]]
+    unknown_emissions: Dict[str, float]
 
 
-def train_from_conll(training_set):
+def train_from_conll(training_set, dev_set):
     return HMM(
         transitions=get_transition_frequencies(training_set),
         emissions=invert(get_emission_frequencies(training_set)),
+        unknown_emissions=smoothing(dev_set)
     )
 
 
 def hmm_ud_english():
-    return train_from_conll(ud_treebank("train"))
+    return train_from_conll(ud_treebank("train"), ud_treebank("dev"))

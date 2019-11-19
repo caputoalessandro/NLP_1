@@ -1,9 +1,4 @@
-from resources import ud_treebank
-
-
-def smoothing():
-
-    development_set = ud_treebank("dev")
+def smoothing(development_set):
     smoothing_dict = {}
     count_dict = {}
 
