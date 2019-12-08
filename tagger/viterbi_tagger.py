@@ -1,5 +1,7 @@
 from typing import List
 
+import pandas as pd
+
 from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
@@ -7,81 +9,61 @@ from tagger.hmm import hmm_ud_english
 from pprint import pprint
 
 
+def retrace_path(backptr: pd.DataFrame, pos):
+    result = [pos]
+
+    for _, col in reversed(list(backptr.items())):
+        pos = col[pos]
+        result.append(pos)
+
+    result.reverse()
+    return result
+
+
 class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
 
-    def pos_tag(self, tokens: List[str]):
+    def _find_best_path(self, viterbi: pd.DataFrame, cell_pos: str):
+        path_ps = self.hmm.transitions.loc[cell_pos] * viterbi.iloc[:, -1]
+        backptr = path_ps.idxmax()
+        return backptr, path_ps[backptr]
 
-        transitions, emissions, default_emissions = self.hmm
-        viterbi_to_add = {}
-        path_to_add = {}
-        values = []
+    def _find_best_paths(self, viterbi: pd.DataFrame):
+        new_backptr_col = pd.Series(index=viterbi.index)
+        new_viterbi_col = pd.Series(index=viterbi.index)
 
-        # prima parola
-        viterbi_matrix = [
-            {
-                pos: transitions["Q0"][pos] + em_value
-                for pos, em_value in emissions.get(
-                    tokens[0], default_emissions
-                ).items()
-            }
-        ]
-
-        backpointer = [{max(viterbi_matrix[0].keys()): "Q0"}]
-
-        # parole centrali
-        for token in tokens[1:]:
-
-            for pos, em_value in emissions.get(
-                token, default_emissions
-            ).items():
-
-                for previus_pos, previus_value in viterbi_matrix[-1].items():
-
-                    values.append(
-                        (
-                            previus_pos,
-                            em_value
-                            + transitions.get(previus_pos, {}).get(pos, 0)
-                            + previus_value,
-                        )
-                    )
-
-                previus_pos, value = max(values)
-                viterbi_to_add[pos] = value
-                path_to_add[pos] = previus_pos
-                values = []
-
-            viterbi_matrix.append(viterbi_to_add)
-            backpointer.append(path_to_add)
-            viterbi_to_add = {}
-            path_to_add = {}
-
-        # ultima parola
-        previus_pos, value = max(
-            (
-                previus_pos,
-                previus_value + transitions.get(previus_pos, {}).get("Qf", 0),
+        for pos in viterbi.index:
+            new_backptr_col[pos], new_viterbi_col[pos] = self._find_best_path(
+                viterbi, pos
             )
-            for previus_pos, previus_value in viterbi_matrix[-1].items()
-        )
 
-        viterbi_matrix.append({pos: value})
-        backpointer.append({"Qf": previus_pos})
+        return new_backptr_col, new_viterbi_col
 
-        rev_backpointer = reversed(backpointer)
-        next(rev_backpointer)
-        previus_pos = backpointer[-1].get("Qf")
-        path = [previus_pos]
+    def pos_tag(self, tokens: List[str]):
+        transitions, emissions, default_emissions = self.hmm
 
-        for pointer in rev_backpointer:
-            if pointer.get(previus_pos) == "Q0":
-                break
-            path.append(pointer.get(previus_pos))
-            previus_pos = pointer.get(previus_pos)
+        viterbi = pd.DataFrame()
+        backptr = pd.DataFrame()
 
-        return list(zip(tokens, reversed(path)))
+        try:
+            tok_emissions = emissions.loc[tokens[0]]
+        except KeyError:
+            tok_emissions = default_emissions
+
+        viterbi[0] = transitions["Q0"] * tok_emissions
+
+        for i in range(1, len(tokens)):
+            backptr[i], viterbi[i] = self._find_best_paths(viterbi)
+            try:
+                viterbi[i] *= emissions.loc[tokens[i]]
+            except KeyError:
+                viterbi[i] *= default_emissions
+
+        path_start = viterbi.iloc[:, -1].idxmax()
+        pos_tags = retrace_path(backptr, path_start)
+
+        return list(zip(tokens, pos_tags))
 
 
 def ud_viterbi_tagger():
@@ -90,4 +72,4 @@ def ud_viterbi_tagger():
 
 if __name__ == "__main__":
     tagger = ud_viterbi_tagger()
-    tagger.pos_tag(sentences[0])
+    res = tagger.pos_tag(sentences[0])

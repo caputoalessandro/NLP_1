@@ -1,8 +1,8 @@
 from typing import Dict, NamedTuple
+import pandas as pd
 
 from resources import ud_treebank
 from tagger.smoothing import smoothing
-import math
 
 __all__ = ["HMM", "hmm_ud_english"]
 
@@ -12,7 +12,7 @@ def normalize(counts: dict):
     for outer_key, inner_dict in counts.items():
         denom = sum(inner_dict.values())
         result[outer_key] = {
-            key: math.log(value) - math.log(denom) for key, value in inner_dict.items()
+            key: value / denom for key, value in inner_dict.items()
         }
     return result
 
@@ -66,16 +66,20 @@ def invert(frequencies):
 
 
 class HMM(NamedTuple):
-    transitions: Dict[str, Dict[str, float]]
-    emissions: Dict[str, Dict[str, float]]
-    unknown_emissions: Dict[str, float]
+    transitions: pd.DataFrame
+    emissions: pd.DataFrame
+    unknown_emissions: pd.Series
 
 
 def train_from_conll(training_set, dev_set):
     return HMM(
-        transitions=get_transition_frequencies(training_set),
-        emissions=invert(get_emission_frequencies(training_set)),
-        unknown_emissions=smoothing(dev_set)
+        transitions=pd.DataFrame.from_dict(
+            get_transition_frequencies(training_set)
+        ).fillna(0),
+        emissions=pd.DataFrame.from_dict(
+            get_emission_frequencies(training_set)
+        ).fillna(0),
+        unknown_emissions=pd.Series(smoothing(dev_set)),
     )
 
 
