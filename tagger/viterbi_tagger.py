@@ -6,7 +6,6 @@ from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
 from tagger.hmm import hmm_ud_english
-from pprint import pprint
 
 
 def retrace_path(backptr: pd.DataFrame, pos):
@@ -24,46 +23,41 @@ class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
 
-    def _find_best_path(self, viterbi: pd.DataFrame, cell_pos: str):
-        path_ps = self.hmm.transitions.loc[cell_pos] * viterbi.iloc[:, -1]
-        backptr = path_ps.idxmax()
-        return backptr, path_ps[backptr]
+    def _best_subpaths(self, prev_viterbi_col: pd.Series):
+        new_backptr_col = pd.Series()
+        new_viterbi_col = pd.Series()
 
-    def _find_best_paths(self, viterbi: pd.DataFrame):
-        new_backptr_col = pd.Series(index=viterbi.index)
-        new_viterbi_col = pd.Series(index=viterbi.index)
+        for pos in prev_viterbi_col.index:
+            path_ps = self.hmm.transitions.loc[pos] * prev_viterbi_col
+            backptr = path_ps.idxmax()
 
-        for pos in viterbi.index:
-            new_backptr_col[pos], new_viterbi_col[pos] = self._find_best_path(
-                viterbi, pos
-            )
+            new_backptr_col[pos], new_viterbi_col[pos] = backptr, path_ps[backptr]
 
         return new_backptr_col, new_viterbi_col
 
     def pos_tag(self, tokens: List[str]):
-        transitions, emissions, default_emissions = self.hmm
+        transitions = self.hmm.transitions
 
         viterbi = pd.DataFrame()
         backptr = pd.DataFrame()
 
-        try:
-            tok_emissions = emissions.loc[tokens[0]]
-        except KeyError:
-            tok_emissions = default_emissions
-
-        viterbi[0] = transitions["Q0"] * tok_emissions
+        viterbi[0] = transitions["Q0"] * self._get_emission(tokens[0])
 
         for i in range(1, len(tokens)):
-            backptr[i], viterbi[i] = self._find_best_paths(viterbi)
-            try:
-                viterbi[i] *= emissions.loc[tokens[i]]
-            except KeyError:
-                viterbi[i] *= default_emissions
+            backptr[i], viterbi[i] = self._best_subpaths(viterbi.iloc[:, -1])
+            viterbi[i] *= self._get_emission(tokens[i])
 
+        viterbi.iloc[:, -1] *= transitions.loc["Qf"]
         path_start = viterbi.iloc[:, -1].idxmax()
         pos_tags = retrace_path(backptr, path_start)
 
         return list(zip(tokens, pos_tags))
+
+    def _get_emission(self, token):
+        try:
+            return self.hmm.emissions.loc[token]
+        except KeyError:
+            return self.hmm.unknown_emissions
 
 
 def ud_viterbi_tagger():
