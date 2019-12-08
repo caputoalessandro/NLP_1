@@ -1,4 +1,6 @@
-from typing import TypeVar, List, Union
+from typing import TypeVar, List, Union, Callable, Dict
+from copy import copy
+
 from toolz.curried import map, mapcat, curry
 
 T = TypeVar("T")
@@ -64,6 +66,26 @@ def _deepitems(previous_keys, obj):
 
 def deepitems(obj):
     yield from _deepitems((), obj)
+
+
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+@curry
+class dict_fn(Dict[K, V], Callable[[K], V]):
+    def __init__(self, fn, data=None):
+        super().__init__(data or {})
+        self._fn = fn
+
+    def __call__(self, key: K) -> V:
+        return self[key]
+
+    def __missing__(self, key: K) -> V:
+        return self._fn(key)
+
+    def copy(self) -> 'dict_fn[K, V]':
+        return copy(self)
 
 
 class DictWithMissing(dict):
