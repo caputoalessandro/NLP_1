@@ -2,6 +2,7 @@ from typing import Dict, NamedTuple
 
 from resources import ud_treebank
 from tagger.smoothing import smoothing
+import math
 
 __all__ = ["HMM", "hmm_ud_english"]
 
@@ -11,7 +12,7 @@ def normalize(counts: dict):
     for outer_key, inner_dict in counts.items():
         denom = sum(inner_dict.values())
         result[outer_key] = {
-            key: value / denom for key, value in inner_dict.items()
+            key: math.log(value) - math.log(denom) for key, value in inner_dict.items()
         }
     return result
 
