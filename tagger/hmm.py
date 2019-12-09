@@ -1,25 +1,12 @@
 from typing import NamedTuple
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from resources import ud_treebank
-from tagger.smoothing import smoothing
-
-__all__ = ["HMM", "hmm_ud_english"]
 
 
-def normalize(counts: dict):
-    result = {}
-    for outer_key, inner_dict in counts.items():
-        denom = sum(inner_dict.values())
-        result[outer_key] = {
-            key: value / denom for key, value in inner_dict.items()
-        }
-    return result
-
-
-def get_transition_frequencies(training_set):
+def transition_counts(training_set):
     """
     Restituisce un dizionario che contiene i conteggi delle transizioni da
     un elemento a un altro.
@@ -38,10 +25,10 @@ def get_transition_frequencies(training_set):
         counts[sentence[-1].upos].setdefault("Qf", 0)
         counts[sentence[-1].upos]["Qf"] += 1
 
-    return normalize(counts)
+    return counts
 
 
-def get_emission_frequencies(training_set):
+def emission_counts(training_set):
     counts = {}
 
     for sentence in training_set:
@@ -52,19 +39,28 @@ def get_emission_frequencies(training_set):
             counts[word.upos].setdefault(word.form, 0)
             counts[word.upos][word.form] += 1
 
-    return normalize(counts)
+    return counts
 
 
-def invert(frequencies):
-    result = {
-        word: {} for words in frequencies.values() for word in words.keys()
-    }
+def smoothing_counts(development_set):
+    smoothing_dict = {}
+    count_dict = {}
 
-    for pos, words in frequencies.items():
-        for word, p in words.items():
-            result[word][pos] = p
+    # conto occorrenze parole
+    for sentence in development_set:
+        for word in sentence:
+            # if not word.is_multiword():
+            count_dict.setdefault(word.form, 0)
+            count_dict[word.form] += 1
 
-    return result
+    # conto quante volte occorre un pos solo per le parole cche appaiono una volta
+    for sentence in development_set:
+        for word in sentence:
+            if count_dict[word.form] == 1 and not word.is_multiword():
+                smoothing_dict.setdefault(word.upos, 0)
+                smoothing_dict[word.upos] += 1
+
+    return smoothing_dict
 
 
 class HMM(NamedTuple):
@@ -78,21 +74,27 @@ class HMM(NamedTuple):
         except KeyError:
             return self.unknown_emissions
 
-    def to_log(self):
-        log_self = [d.apply(np.log) for d in self]
-        return HMM(*log_self)
+
+def divide_by_total_log(s: pd.Series):
+    return s.apply(np.log) - np.log(s.sum())
+
+
+def counts_to_probs_df(counts: dict):
+    df = pd.DataFrame.from_dict(counts).fillna(0)
+    df = df.apply(divide_by_total_log)
+    return df
+
+
+def counts_to_probs_series(counts: dict):
+    return divide_by_total_log(pd.Series(counts))
 
 
 def train_from_conll(training_set, dev_set):
-    return HMM(
-        transitions=pd.DataFrame.from_dict(
-            get_transition_frequencies(training_set)
-        ).fillna(0),
-        emissions=pd.DataFrame.from_dict(
-            get_emission_frequencies(training_set)
-        ).fillna(0),
-        unknown_emissions=pd.Series(smoothing(dev_set)),
-    ).to_log()
+    transitions = counts_to_probs_df(transition_counts(training_set))
+    emissions = counts_to_probs_df(emission_counts(training_set))
+    smoothing = counts_to_probs_series(smoothing_counts(dev_set))
+
+    return HMM(transitions, emissions, smoothing)
 
 
 def hmm_ud_english():
