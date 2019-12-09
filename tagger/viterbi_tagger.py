@@ -29,7 +29,7 @@ class ViterbiTagger(PosTagger):
 
         for pos in prev_viterbi_col.index:
 
-            path_ps = prev_viterbi_col * self.hmm.transitions.loc[pos]
+            path_ps = prev_viterbi_col + self.hmm.transitions.loc[pos]
             backptr = path_ps.idxmax()
 
             new_backptr_col[pos], new_viterbi_col[pos] = backptr, path_ps[backptr]
@@ -40,17 +40,17 @@ class ViterbiTagger(PosTagger):
         hmm = self.hmm
 
         # Invece di costruire tutta la matrice, tiene in memoria solo l'ultima colonna.
-        viterbi = hmm.transitions["Q0"] * hmm.get_emission(tokens[0])
+        viterbi = hmm.transitions["Q0"] + hmm.get_emission(tokens[0])
 
         # I backptr servono tutti invece.
         backptr = []
 
         for token in tokens[1:]:
             backptr_col, viterbi = self._next_col(viterbi)
-            viterbi *= hmm.get_emission(token)
+            viterbi += hmm.get_emission(token)
             backptr.append(backptr_col)
 
-        viterbi *= hmm.transitions.loc["Qf"]
+        viterbi += hmm.transitions.loc["Qf"]
         path_start = viterbi.idxmax()
         pos_tags = retrace_path(backptr, path_start)
 

@@ -1,6 +1,7 @@
 from typing import NamedTuple
 
 import pandas as pd
+import numpy as np
 
 from resources import ud_treebank
 from tagger.smoothing import smoothing
@@ -77,6 +78,10 @@ class HMM(NamedTuple):
         except KeyError:
             return self.unknown_emissions
 
+    def to_log(self):
+        log_self = [d.apply(np.log) for d in self]
+        return HMM(*log_self)
+
 
 def train_from_conll(training_set, dev_set):
     return HMM(
@@ -87,7 +92,7 @@ def train_from_conll(training_set, dev_set):
             get_emission_frequencies(training_set)
         ).fillna(0),
         unknown_emissions=pd.Series(smoothing(dev_set)),
-    )
+    ).to_log()
 
 
 def hmm_ud_english():
