@@ -8,10 +8,10 @@ from tagger.hmm import HMM
 from tagger.hmm import hmm_ud_english
 
 
-def retrace_path(backptr: pd.DataFrame, pos):
+def retrace_path(backptr, pos):
     result = [pos]
 
-    for _, col in reversed(list(backptr.items())):
+    for col in reversed(backptr):
         pos = col[pos]
         result.append(pos)
 
@@ -23,12 +23,13 @@ class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
 
-    def _best_subpaths(self, prev_viterbi_col: pd.Series):
-        new_backptr_col = pd.Series()
+    def _next_col(self, prev_viterbi_col: pd.Series):
         new_viterbi_col = pd.Series()
+        new_backptr_col = {}
 
         for pos in prev_viterbi_col.index:
-            path_ps = self.hmm.transitions.loc[pos] * prev_viterbi_col
+
+            path_ps = prev_viterbi_col * self.hmm.transitions.loc[pos]
             backptr = path_ps.idxmax()
 
             new_backptr_col[pos], new_viterbi_col[pos] = backptr, path_ps[backptr]
@@ -36,28 +37,24 @@ class ViterbiTagger(PosTagger):
         return new_backptr_col, new_viterbi_col
 
     def pos_tag(self, tokens: List[str]):
-        transitions = self.hmm.transitions
+        hmm = self.hmm
 
-        viterbi = pd.DataFrame()
-        backptr = pd.DataFrame()
+        # Invece di costruire tutta la matrice, tiene in memoria solo l'ultima colonna.
+        viterbi = hmm.transitions["Q0"] * hmm.get_emission(tokens[0])
 
-        viterbi[0] = transitions["Q0"] * self._get_emission(tokens[0])
+        # I backptr servono tutti invece.
+        backptr = []
 
-        for i in range(1, len(tokens)):
-            backptr[i], viterbi[i] = self._best_subpaths(viterbi.iloc[:, -1])
-            viterbi[i] *= self._get_emission(tokens[i])
+        for token in tokens[1:]:
+            backptr_col, viterbi = self._next_col(viterbi)
+            viterbi *= hmm.get_emission(token)
+            backptr.append(backptr_col)
 
-        viterbi.iloc[:, -1] *= transitions.loc["Qf"]
-        path_start = viterbi.iloc[:, -1].idxmax()
+        viterbi *= hmm.transitions.loc["Qf"]
+        path_start = viterbi.idxmax()
         pos_tags = retrace_path(backptr, path_start)
 
         return list(zip(tokens, pos_tags))
-
-    def _get_emission(self, token):
-        try:
-            return self.hmm.emissions.loc[token]
-        except KeyError:
-            return self.hmm.unknown_emissions
 
 
 def ud_viterbi_tagger():

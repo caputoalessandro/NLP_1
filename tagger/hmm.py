@@ -1,4 +1,5 @@
-from typing import Dict, NamedTuple
+from typing import NamedTuple
+
 import pandas as pd
 
 from resources import ud_treebank
@@ -69,6 +70,12 @@ class HMM(NamedTuple):
     transitions: pd.DataFrame
     emissions: pd.DataFrame
     unknown_emissions: pd.Series
+
+    def get_emission(self, token):
+        try:
+            return self.emissions.loc[token]
+        except KeyError:
+            return self.unknown_emissions
 
 
 def train_from_conll(training_set, dev_set):
