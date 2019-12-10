@@ -7,9 +7,9 @@ from resources import tokenized_sentences
 def test_performance(baseline_tagger, viterbi_tagger):
 
     baseline_performance = tagger_performance(baseline_tagger)
-    print(f"Baseline: {baseline_performance:.2%}")
+    print(f"Baseline: {baseline_performance:.4%}")
     viterbi_performance = tagger_performance(viterbi_tagger)
-    print(f"Viterbi: {viterbi_performance:.2%}")
+    print(f"Viterbi: {viterbi_performance:.4%}")
 
     assert baseline_performance < viterbi_performance
 
