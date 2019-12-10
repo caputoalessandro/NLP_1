@@ -68,12 +68,12 @@ def deepitems(obj):
     yield from _deepitems((), obj)
 
 
-def invert(frequencies):
-    result = {word: {} for words in frequencies.values() for word in words.keys()}
+def transpose(outer):
+    result = {k2: {} for inner in outer.values() for k2 in inner.keys()}
 
-    for pos, words in frequencies.items():
-        for word, p in words.items():
-            result[word][pos] = p
+    for k1, inner in outer.items():
+        for k2, val in inner.items():
+            result[k2][k1] = val
 
     return result
 

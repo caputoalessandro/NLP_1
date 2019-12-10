@@ -1,16 +1,12 @@
-from typing import Dict, NamedTuple
-from utils import invert, dict_with_missing
-from toolz.curried import merge, valmap, pipe
 from math import log
+from typing import Dict, NamedTuple
+
+from toolz.curried import merge, valmap, pipe
 
 from resources import ud_treebank
+from utils import transpose, dict_with_missing
 
 __all__ = ["HMM", "hmm_ud_english"]
-
-
-def div_by_total(counts: dict):
-    total = sum(counts.values())
-    return {k: v / total for k, v in counts.items()}
 
 
 def div_by_total_log(counts: dict):
@@ -80,18 +76,15 @@ def smoothing_counts(dev_set):
 class HMM(NamedTuple):
     transitions: Dict[str, Dict[str, float]]
     emissions: Dict[str, Dict[str, float]]
-    uses_log: bool
 
 
-def train_from_conll(training_set, dev_set, use_log=True):
-    _div_by_total = div_by_total_log if use_log else div_by_total
-
-    transitions = pipe(training_set, transition_counts, valmap(_div_by_total), invert)
-    emissions = pipe(training_set, emission_counts, valmap(_div_by_total), invert)
-    smoothing = pipe(dev_set, smoothing_counts, _div_by_total)
+def train_from_conll(training_set, dev_set):
+    transitions = pipe(training_set, transition_counts, valmap(div_by_total_log), transpose)
+    emissions = pipe(training_set, emission_counts, valmap(div_by_total_log), transpose)
+    smoothing = pipe(dev_set, smoothing_counts, div_by_total_log)
     emissions = dict_with_missing(emissions, smoothing)
 
-    return HMM(transitions, emissions, use_log)
+    return HMM(transitions, emissions)
 
 
 def hmm_ud_english():
