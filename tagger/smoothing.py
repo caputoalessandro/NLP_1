@@ -1,5 +1,3 @@
-import math
-
 def smoothing(development_set):
     smoothing_dict = {}
     count_dict = {}
@@ -23,6 +21,6 @@ def smoothing(development_set):
 
     # calcolo le probabilità dividendo per il numero di parole singole
     for key, value in smoothing_dict.items():
-        smoothing_dict[key] = math.log(value) - math.log(single_words)
+        smoothing_dict[key] = value / single_words
     # print(smoothing_dict)
     return smoothing_dict

@@ -84,8 +84,16 @@ class dict_fn(Dict[K, V], Callable[[K], V]):
     def __missing__(self, key: K) -> V:
         return self._fn(key)
 
-    def copy(self) -> 'dict_fn[K, V]':
+    def copy(self) -> "dict_fn[K, V]":
         return copy(self)
+
+
+def get_row(d, key):
+    result = {}
+    for out_k, inner_d in d.items():
+        if key in inner_d:
+            result[out_k] = inner_d[key]
+    return result
 
 
 class DictWithMissing(dict):

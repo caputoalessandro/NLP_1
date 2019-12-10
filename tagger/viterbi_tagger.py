@@ -1,87 +1,57 @@
+from functools import reduce
 from typing import List
 
 from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
 from tagger.hmm import hmm_ud_english
-from pprint import pprint
+
+from operator import mul
+from utils import get_row
+
+
+def retrace_path(backptr, start):
+    return reduce(
+        lambda path, backptr_col: [backptr_col[path[0]], *path], reversed(backptr), [start]
+    )
+
+
+def merge_with(fn, d1, d2):
+    return {key: fn(d1[key], d2[key]) for key in d1.keys() & d2.keys()}
 
 
 class ViterbiTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
 
-    def pos_tag(self, tokens: List[str]):
+    def _next_col(self, last_col, token):
+        viterbi = {}
+        backptr = {}
 
-        transitions, emissions, default_emissions = self.hmm
-        viterbi_to_add = {}
-        path_to_add = {}
-        values = []
-
-        # prima parola
-        viterbi_matrix = [
-            {
-                pos: transitions["Q0"][pos] + em_value
-                for pos, em_value in emissions.get(
-                    tokens[0], default_emissions
-                ).items()
-            }
-        ]
-
-        backpointer = [{max(viterbi_matrix[0].keys()): "Q0"}]
-
-        # parole centrali
-        for token in tokens[1:]:
-
-            for pos, em_value in emissions.get(
-                token, default_emissions
-            ).items():
-
-                for previus_pos, previus_value in viterbi_matrix[-1].items():
-
-                    values.append(
-                        (
-                            previus_pos,
-                            em_value
-                            + transitions.get(previus_pos, {}).get(pos, 0)
-                            + previus_value,
-                        )
-                    )
-
-                previus_pos, value = max(values)
-                viterbi_to_add[pos] = value
-                path_to_add[pos] = previus_pos
-                values = []
-
-            viterbi_matrix.append(viterbi_to_add)
-            backpointer.append(path_to_add)
-            viterbi_to_add = {}
-            path_to_add = {}
-
-        # ultima parola
-        previus_pos, value = max(
-            (
-                previus_pos,
-                previus_value + transitions.get(previus_pos, {}).get("Qf", 0),
+        for pos in self.hmm.emissions.get(token, self.hmm.unknown_emissions).keys():
+            possible_paths_to_pos = merge_with(mul, last_col, self.hmm.transitions[pos])
+            viterbi[pos], backptr[pos] = max(
+                (v, k) for k, v in possible_paths_to_pos.items()
             )
-            for previus_pos, previus_value in viterbi_matrix[-1].items()
-        )
 
-        viterbi_matrix.append({pos: value})
-        backpointer.append({"Qf": previus_pos})
+        return viterbi, backptr
 
-        rev_backpointer = reversed(backpointer)
-        next(rev_backpointer)
-        previus_pos = backpointer[-1].get("Qf")
-        path = [previus_pos]
+    def pos_tag(self, tokens: List[str]):
+        transitions, emissions, default_emissions = self.hmm
 
-        for pointer in rev_backpointer:
-            if pointer.get(previus_pos) == "Q0":
-                break
-            path.append(pointer.get(previus_pos))
-            previus_pos = pointer.get(previus_pos)
+        viterbi = merge_with(mul, get_row(transitions, "Q0"), emissions.get(tokens[0], default_emissions))
+        backptr = []
 
-        return list(zip(tokens, reversed(path)))
+        for token in tokens[1:]:
+            viterbi, next_backptr = self._next_col(viterbi, token)
+            viterbi = merge_with(mul, viterbi, emissions.get(token, default_emissions))
+            backptr.append(next_backptr)
+
+        viterbi = merge_with(mul, viterbi, transitions["Qf"])
+        path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
+        pos_tags = retrace_path(backptr, path_start)
+
+        return list(zip(tokens, pos_tags))
 
 
 def ud_viterbi_tagger():
@@ -90,4 +60,4 @@ def ud_viterbi_tagger():
 
 if __name__ == "__main__":
     tagger = ud_viterbi_tagger()
-    tagger.pos_tag(sentences[0])
+    res = tagger.pos_tag(sentences[0])

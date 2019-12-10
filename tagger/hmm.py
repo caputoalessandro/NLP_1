@@ -1,8 +1,8 @@
 from typing import Dict, NamedTuple
+from toolz import merge, valmap
 
 from resources import ud_treebank
 from tagger.smoothing import smoothing
-import math
 
 __all__ = ["HMM", "hmm_ud_english"]
 
@@ -11,10 +11,13 @@ def normalize(counts: dict):
     result = {}
     for outer_key, inner_dict in counts.items():
         denom = sum(inner_dict.values())
-        result[outer_key] = {
-            key: math.log(value) - math.log(denom) for key, value in inner_dict.items()
-        }
+        result[outer_key] = {key: value / denom for key, value in inner_dict.items()}
     return result
+
+
+def smooth_transitions(counts):
+    default_value = dict.fromkeys(counts.keys(), 1)
+    return valmap(lambda d: merge(default_value, d), counts)
 
 
 def get_transition_frequencies(training_set):
@@ -36,7 +39,7 @@ def get_transition_frequencies(training_set):
         counts[sentence[-1].upos].setdefault("Qf", 0)
         counts[sentence[-1].upos]["Qf"] += 1
 
-    return normalize(counts)
+    return normalize(smooth_transitions(counts))
 
 
 def get_emission_frequencies(training_set):
@@ -54,9 +57,7 @@ def get_emission_frequencies(training_set):
 
 
 def invert(frequencies):
-    result = {
-        word: {} for words in frequencies.values() for word in words.keys()
-    }
+    result = {word: {} for words in frequencies.values() for word in words.keys()}
 
     for pos, words in frequencies.items():
         for word, p in words.items():
@@ -73,9 +74,9 @@ class HMM(NamedTuple):
 
 def train_from_conll(training_set, dev_set):
     return HMM(
-        transitions=get_transition_frequencies(training_set),
+        transitions=invert(get_transition_frequencies(training_set)),
         emissions=invert(get_emission_frequencies(training_set)),
-        unknown_emissions=smoothing(dev_set)
+        unknown_emissions=smoothing(dev_set),
     )
 
 
