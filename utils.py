@@ -68,24 +68,14 @@ def deepitems(obj):
     yield from _deepitems((), obj)
 
 
-K = TypeVar("K")
-V = TypeVar("V")
+def invert(frequencies):
+    result = {word: {} for words in frequencies.values() for word in words.keys()}
 
+    for pos, words in frequencies.items():
+        for word, p in words.items():
+            result[word][pos] = p
 
-@curry
-class dict_fn(Dict[K, V], Callable[[K], V]):
-    def __init__(self, fn, data=None):
-        super().__init__(data or {})
-        self._fn = fn
-
-    def __call__(self, key: K) -> V:
-        return self[key]
-
-    def __missing__(self, key: K) -> V:
-        return self._fn(key)
-
-    def copy(self) -> "dict_fn[K, V]":
-        return copy(self)
+    return result
 
 
 def get_row(d, key):
@@ -96,13 +86,16 @@ def get_row(d, key):
     return result
 
 
+def dict_with_missing(data, default):
+    d = DictWithMissing(data)
+    d.missing = default
+    return d
+
+
 class DictWithMissing(dict):
     def __init__(self, *args, **kwargs):
         self.missing = None
-        self.missing_factory = None
         super().__init__(*args, **kwargs)
 
-    def __missing__(self, key):
-        if self.missing_factory:
-            return self.missing_factory(key)
+    def __missing__(self, _):
         return self.missing

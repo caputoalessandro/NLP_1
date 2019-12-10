@@ -1,26 +1,24 @@
 from typing import Dict, NamedTuple
-from toolz import merge, valmap
+from utils import invert, dict_with_missing
+from toolz.curried import merge, valmap, pipe
+from math import log
 
 from resources import ud_treebank
-from tagger.smoothing import smoothing
 
 __all__ = ["HMM", "hmm_ud_english"]
 
 
-def normalize(counts: dict):
-    result = {}
-    for outer_key, inner_dict in counts.items():
-        denom = sum(inner_dict.values())
-        result[outer_key] = {key: value / denom for key, value in inner_dict.items()}
-    return result
+def div_by_total(counts: dict):
+    total = sum(counts.values())
+    return {k: v / total for k, v in counts.items()}
 
 
-def smooth_transitions(counts):
-    default_value = dict.fromkeys(counts.keys(), 1)
-    return valmap(lambda d: merge(default_value, d), counts)
+def div_by_total_log(counts: dict):
+    to_sub = log(sum(counts.values()))
+    return {k: log(v) - to_sub for k, v in counts.items()}
 
 
-def get_transition_frequencies(training_set):
+def transition_counts(training_set):
     """
     Restituisce un dizionario che contiene i conteggi delle transizioni da
     un elemento a un altro.
@@ -39,10 +37,12 @@ def get_transition_frequencies(training_set):
         counts[sentence[-1].upos].setdefault("Qf", 0)
         counts[sentence[-1].upos]["Qf"] += 1
 
-    return normalize(smooth_transitions(counts))
+    # smoothing: dai conteggio 1 alle transizioni che non avvengono mai
+    default_count = dict.fromkeys(counts.keys(), 1)
+    return valmap(lambda c: merge(default_count, c), counts)
 
 
-def get_emission_frequencies(training_set):
+def emission_counts(training_set):
     counts = {}
 
     for sentence in training_set:
@@ -53,31 +53,45 @@ def get_emission_frequencies(training_set):
             counts[word.upos].setdefault(word.form, 0)
             counts[word.upos][word.form] += 1
 
-    return normalize(counts)
+    return counts
 
 
-def invert(frequencies):
-    result = {word: {} for words in frequencies.values() for word in words.keys()}
+def smoothing_counts(dev_set):
+    smoothing_dict = {}
+    count_dict = {}
 
-    for pos, words in frequencies.items():
-        for word, p in words.items():
-            result[word][pos] = p
+    # conto occorrenze parole
+    for sentence in dev_set:
+        for word in sentence:
+            # if not word.is_multiword():
+            count_dict.setdefault(word.form, 0)
+            count_dict[word.form] += 1
 
-    return result
+    # conto quante volte occorre un pos solo per le parole cche appaiono una volta
+    for sentence in dev_set:
+        for word in sentence:
+            if count_dict[word.form] == 1 and not word.is_multiword():
+                smoothing_dict.setdefault(word.upos, 0)
+                smoothing_dict[word.upos] += 1
+
+    return smoothing_dict
 
 
 class HMM(NamedTuple):
     transitions: Dict[str, Dict[str, float]]
     emissions: Dict[str, Dict[str, float]]
-    unknown_emissions: Dict[str, float]
+    uses_log: bool
 
 
-def train_from_conll(training_set, dev_set):
-    return HMM(
-        transitions=invert(get_transition_frequencies(training_set)),
-        emissions=invert(get_emission_frequencies(training_set)),
-        unknown_emissions=smoothing(dev_set),
-    )
+def train_from_conll(training_set, dev_set, use_log=True):
+    _div_by_total = div_by_total_log if use_log else div_by_total
+
+    transitions = pipe(training_set, transition_counts, valmap(_div_by_total), invert)
+    emissions = pipe(training_set, emission_counts, valmap(_div_by_total), invert)
+    smoothing = pipe(dev_set, smoothing_counts, _div_by_total)
+    emissions = dict_with_missing(emissions, smoothing)
+
+    return HMM(transitions, emissions, use_log)
 
 
 def hmm_ud_english():
