@@ -29,8 +29,7 @@ def make_det(form: Form):
         lemma = "lo"
 
     det_tok = det[
-        features.setdefault("gender", "masc"),
-        features.setdefault("qty", "singular"),
+        features.setdefault("gender", "masc"), features.setdefault("qty", "singular")
     ]
 
     if noun_tok[0] in "aeiou" and not features["gender"] == "plural":
@@ -43,16 +42,15 @@ def perfection(forms: List[Form]):
     result = [forms[0]]
 
     for current_form, next_form in zip(forms, forms[1:]):
-        needs_article = (
-            current_form.pos == "VERB" and next_form.pos == "NOUN"
-        ) or (current_form.pos == "CCONJ" and next_form.pos == "NOUN")
+        needs_article = next_form.pos == "NOUN" and current_form.pos in (
+            "VERB",
+            "CCONJ",
+        )
 
         if needs_article:
             result.append(make_det(next_form))
         elif current_form.pos == "NOUN" and next_form.pos == "PRON":
-            result.append(
-                Form(token="che", lemma="che", pos="CCONJ", features={})
-            )
+            result.append(Form(token="che", lemma="che", pos="CCONJ", features={}))
 
         if not (current_form.pos == "VERB" and next_form.pos == "ADP"):
             result.append(next_form)

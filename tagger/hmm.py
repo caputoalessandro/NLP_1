@@ -10,8 +10,8 @@ __all__ = ["HMM", "hmm_ud_english"]
 
 
 def div_by_total_log(counts: dict):
-    to_sub = log(sum(counts.values()))
-    return {k: log(v) - to_sub for k, v in counts.items()}
+    denom = log(sum(counts.values()))
+    return {k: log(v) - denom for k, v in counts.items()}
 
 
 def transition_counts(training_set):
@@ -33,9 +33,13 @@ def transition_counts(training_set):
         counts[sentence[-1].upos].setdefault("Qf", 0)
         counts[sentence[-1].upos]["Qf"] += 1
 
+    return counts
+
+
+def smooth_transitions(counts):
     # smoothing: dai conteggio 1 alle transizioni che non avvengono mai
     default_count = dict.fromkeys(counts.keys(), 1)
-    return valmap(lambda c: merge(default_count, c), counts)
+    return {k: merge(default_count, v) for k, v in counts.items()}
 
 
 def emission_counts(training_set):
@@ -59,7 +63,6 @@ def smoothing_counts(dev_set):
     # conto occorrenze parole
     for sentence in dev_set:
         for word in sentence:
-            # if not word.is_multiword():
             count_dict.setdefault(word.form, 0)
             count_dict[word.form] += 1
 
@@ -79,7 +82,13 @@ class HMM(NamedTuple):
 
 
 def train_from_conll(training_set, dev_set):
-    transitions = pipe(training_set, transition_counts, valmap(div_by_total_log), transpose)
+    transitions = pipe(
+        training_set,
+        transition_counts,
+        smooth_transitions,
+        valmap(div_by_total_log),
+        transpose,
+    )
     emissions = pipe(training_set, emission_counts, valmap(div_by_total_log), transpose)
     smoothing = pipe(dev_set, smoothing_counts, div_by_total_log)
     emissions = dict_with_missing(emissions, smoothing)
