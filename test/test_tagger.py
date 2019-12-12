@@ -16,5 +16,5 @@ def test_performance(baseline_tagger, viterbi_tagger):
 
 @pytest.mark.parametrize("tokens", tokenized_sentences)
 def test_sentences(tokens, viterbi_tagger):
-    tagged_tokens = viterbi_tagger.pos_tag(tokens)
+    tagged_tokens = viterbi_tagger.pos_tags(tokens)
     pprint(tagged_tokens)

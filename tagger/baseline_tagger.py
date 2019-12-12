@@ -10,8 +10,8 @@ class BaselineTagger(PosTagger):
     def __init__(self, model):
         self.model: Mapping[str, str] = model
 
-    def pos_tag(self, tokens: List[str]):
-        return [(tok, self.model[tok]) for tok in tokens]
+    def pos_tags(self, tokens: List[str]):
+        return [self.model[tok] for tok in tokens]
 
 
 def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):

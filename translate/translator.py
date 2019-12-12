@@ -76,7 +76,7 @@ class DirectTranslator:
     def translate(self, tokens: List[str]):
         return pipe(
             tokens,
-            self.tagger.pos_tag,
+            self.tagger.tagged_tokens,
             emap(self.find_multiforms_for_token),
             emap(self.translate_multiform_to_it),
             disambiguate,

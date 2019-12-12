@@ -5,13 +5,13 @@ import logging
 
 logger = logging.getLogger()
 
+
 def count_correct_tags(tagger: PosTagger, sentence: Sentence):
     golden = [(word.form, word.upos) for word in sentence if not word.is_multiword()]
     tokens = [token for token, _ in golden]
-    hypothesis = tagger.pos_tag(tokens)
+    hypothesis = tagger.tagged_tokens(tokens)
 
     assert len(golden) == len(hypothesis)
-
     return len(tokens), sum(g == h for g, h in zip(golden, hypothesis))
 
 

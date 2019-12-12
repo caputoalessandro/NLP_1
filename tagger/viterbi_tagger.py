@@ -33,7 +33,7 @@ class ViterbiTagger(PosTagger):
         viterbi = merge_with(add, viterbi, emissions[token])
         return viterbi, backptr
 
-    def pos_tag(self, tokens: List[str]):
+    def pos_tags(self, tokens: List[str]):
         transitions, emissions = self.hmm
 
         # Mantiene in memoria solo l'ultima colonna invece di tutta la matrice.
@@ -46,9 +46,7 @@ class ViterbiTagger(PosTagger):
 
         viterbi = merge_with(add, viterbi, transitions["Qf"])
         path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
-        pos_tags = retrace_path(backptr, path_start)
-
-        return list(zip(tokens, pos_tags))
+        return retrace_path(backptr, path_start)
 
 
 def ud_viterbi_tagger():
@@ -57,4 +55,4 @@ def ud_viterbi_tagger():
 
 if __name__ == "__main__":
     tagger = ud_viterbi_tagger()
-    res = tagger.pos_tag(sentences[0])
+    res = tagger.pos_tags(sentences[0])

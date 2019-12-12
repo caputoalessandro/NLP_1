@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Tuple
 
-from tagger.abc import PosTagger, TaggedToken
-from resources import tagged_sentences, tokenized_sentences
+from tagger.abc import PosTagger
+from resources import sentences_tags, tokenized_sentences
 
 
 class OmniscentTagger(PosTagger):
@@ -10,10 +10,10 @@ class OmniscentTagger(PosTagger):
     Utile a verificare il comportamento del traduttore quando i pos tag sono corretti.
     """
 
-    def pos_tag(self, tokens: List[str]) -> List[TaggedToken]:
+    def pos_tags(self, tokens: List[str]) -> List[Tuple[str, str]]:
         for i, tokenized_sentence in enumerate(tokenized_sentences):
             if tokenized_sentence == tokens:
-                return tagged_sentences[i]
+                return sentences_tags[i]
 
         raise ValueError(
             "OmniscentTagger può essere usato solo sulle frasi d'esempio."
