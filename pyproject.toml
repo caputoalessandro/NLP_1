@@ -6,6 +6,8 @@ authors = ["Alessandro Caputo", "Emanuele Gentiletti"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pyconll = "^3.0.4"
+toolz = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
 

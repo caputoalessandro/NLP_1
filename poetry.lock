@@ -1,0 +1,30 @@
+[[package]]
+name = "pyconll"
+version = "3.0.4"
+description = "Read and manipulate CoNLL files"
+category = "main"
+optional = false
+python-versions = "~=3.6"
+
+[[package]]
+name = "toolz"
+version = "0.11.1"
+description = "List processing tools and functional utilities"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.9"
+content-hash = "416de4d098a399b0c862d8e7633be3f365afed8b303ad3c702a3e862e26e829c"
+
+[metadata.files]
+pyconll = [
+    {file = "pyconll-3.0.4-py3-none-any.whl", hash = "sha256:f3baf54fe480e225ab081f9f012c259d688496b47eb38f3f9d8cf00e54994b3f"},
+    {file = "pyconll-3.0.4.tar.gz", hash = "sha256:083539530add5dd38304cd78d8efd2d3109d6c62f13624f7eb9879cdb37f89c3"},
+]
+toolz = [
+    {file = "toolz-0.11.1-py3-none-any.whl", hash = "sha256:1bc473acbf1a1db4e72a1ce587be347450e8f08324908b8a266b486f408f04d5"},
+    {file = "toolz-0.11.1.tar.gz", hash = "sha256:c7a47921f07822fe534fb1c01c9931ab335a4390c782bd28c6bcc7c2f71f3fbf"},
+]
