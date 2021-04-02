@@ -1,4 +1,0 @@
-pyconll
-pytest
-pyyaml
-toolz

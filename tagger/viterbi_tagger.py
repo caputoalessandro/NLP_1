@@ -1,10 +1,7 @@
 from operator import add
 from typing import List
-
-from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
-from tagger.hmm import hmm_ud_english
 from utils import get_row, merge_with
 
 
@@ -47,12 +44,3 @@ class ViterbiTagger(PosTagger):
         viterbi = merge_with(add, viterbi, transitions["Qf"])
         path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
         return retrace_path(backptr, path_start)
-
-
-def ud_viterbi_tagger():
-    return ViterbiTagger(hmm_ud_english())
-
-
-if __name__ == "__main__":
-    tagger = ud_viterbi_tagger()
-    res = tagger.pos_tags(sentences[0])
