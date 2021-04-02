@@ -1,10 +1,7 @@
 from operator import add
 from typing import List
-
-from resources import tokenized_sentences as sentences
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
-from tagger.hmm import hmm_ud_english
 from utils import get_row, merge_with
 
 
@@ -16,7 +13,7 @@ def retrace_path(backptr, start):
     return path
 
 
-class ViterbiTagger(PosTagger):
+class HMMTagger(PosTagger):
     def __init__(self, hmm: HMM):
         self.hmm = hmm
 
@@ -28,7 +25,9 @@ class ViterbiTagger(PosTagger):
 
         for pos in emissions[token].keys():
             paths_to_pos = merge_with(add, last_col, transitions[pos])
-            backptr[pos], viterbi[pos] = max(paths_to_pos.items(), key=lambda it: it[1])
+            backptr[pos], viterbi[pos] = max(
+                paths_to_pos.items(), key=lambda it: it[1]
+            )
 
         viterbi = merge_with(add, viterbi, emissions[token])
         return viterbi, backptr
@@ -37,7 +36,9 @@ class ViterbiTagger(PosTagger):
         transitions, emissions = self.hmm
 
         # Mantiene in memoria solo l'ultima colonna invece di tutta la matrice.
-        viterbi = merge_with(add, get_row(transitions, "Q0"), emissions[tokens[0]])
+        viterbi = merge_with(
+            add, get_row(transitions, "Q0"), emissions[tokens[0]]
+        )
         backptr = []
 
         for token in tokens[1:]:
@@ -47,12 +48,3 @@ class ViterbiTagger(PosTagger):
         viterbi = merge_with(add, viterbi, transitions["Qf"])
         path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
         return retrace_path(backptr, path_start)
-
-
-def ud_viterbi_tagger():
-    return ViterbiTagger(hmm_ud_english())
-
-
-if __name__ == "__main__":
-    tagger = ud_viterbi_tagger()
-    res = tagger.pos_tags(sentences[0])

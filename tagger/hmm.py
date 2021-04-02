@@ -3,10 +3,10 @@ from typing import Dict, NamedTuple
 
 from toolz.curried import merge, valmap, pipe
 
-from resources import ud_treebank
+from resources import Corpus
 from utils import transpose, dict_with_missing
 
-__all__ = ["HMM", "hmm_ud_english"]
+__all__ = ["HMM", "train_hmm"]
 
 
 def div_by_total_log(counts: dict):
@@ -81,20 +81,19 @@ class HMM(NamedTuple):
     emissions: Dict[str, Dict[str, float]]
 
 
-def train_from_conll(training_set, dev_set):
+def train_hmm(corpus):
     transitions = pipe(
-        training_set,
+        corpus.train,
         transition_counts,
         smooth_transitions,
         valmap(div_by_total_log),
         transpose,
     )
-    emissions = pipe(training_set, emission_counts, valmap(div_by_total_log), transpose)
-    smoothing = pipe(dev_set, smoothing_counts, div_by_total_log)
+    emissions = pipe(corpus.train, emission_counts, valmap(div_by_total_log), transpose)
+    smoothing = pipe(corpus.dev, smoothing_counts, div_by_total_log)
     emissions = dict_with_missing(emissions, smoothing)
 
     return HMM(transitions, emissions)
 
 
-def hmm_ud_english():
-    return train_from_conll(ud_treebank("train"), ud_treebank("dev"))
+

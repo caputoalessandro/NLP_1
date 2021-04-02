@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Mapping, List
 
-from resources import ud_treebank
+from resources import Corpus
 from tagger.abc import PosTagger
 from utils import DictWithMissing
 
@@ -13,6 +13,10 @@ class BaselineTagger(PosTagger):
     def pos_tags(self, tokens: List[str]):
         return [self.model[tok] for tok in tokens]
 
+    @classmethod
+    def train(_, corpus):
+        return ud_baseline_tagger(corpus)
+
 
 def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
     model = DictWithMissing(
@@ -23,11 +27,10 @@ def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
     return model
 
 
-def ud_baseline_tagger():
-    training_set = ud_treebank("train")
+def ud_baseline_tagger(corpus: Corpus):
     counts = defaultdict(lambda: defaultdict(lambda: 0))
 
-    for sentence in training_set:
+    for sentence in corpus.train:
         for token in sentence:
             counts[token.form][token.upos] += 1
 

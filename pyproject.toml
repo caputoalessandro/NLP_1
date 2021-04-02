@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "viterbi_tagger"
+name = "pos_tagger"
 version = "0.1.0"
 description = ""
 authors = ["Alessandro Caputo", "Emanuele Gentiletti"]
@@ -10,6 +10,9 @@ pyconll = "^3.0.4"
 toolz = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
+
+[tool.black]
+line-length = 80
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
