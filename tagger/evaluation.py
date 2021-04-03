@@ -17,13 +17,20 @@ def correct_tags_count_in_sentence(tagger: PosTagger, sentence):
 def correct_tags_ratio_in_corpus(tagger: PosTagger, corpus: Corpus):
     total_tags = 0
     correct_tags = 0
+    errors = 0
 
     for sentence in corpus.test:
-        sentence_tags, correct_sent_tags = correct_tags_count_in_sentence(
-            tagger, sentence
-        )
+        try:
+            sentence_tags, correct_sent_tags = correct_tags_count_in_sentence(
+                tagger, sentence
+            )
+        except (ValueError, KeyError):
+            errors += 1
+            continue
         total_tags += sentence_tags
         correct_tags += correct_sent_tags
+
+    print(f'Errors: {errors}')
 
     return correct_tags / total_tags
 
@@ -42,9 +49,9 @@ def main():
     hmm = HMMTagger.train(corpus)
     taggers = [
         ('Baseline', BaselineTagger.train(corpus)),
-        # ('HMM with NOUN', hmm.with_unknown_emissions(ALWAYS_NOUN)),
-        # ('HMM with NOUN|VERB', hmm.with_unknown_emissions(ALWAYS_NOUN_OR_VERB)),
-        # ('HMM with uniform', hmm.with_unknown_emissions(UNIFORM)),
+        ('HMM with NOUN', hmm.with_unknown_emissions(ALWAYS_NOUN)),
+        ('HMM with NOUN|VERB', hmm.with_unknown_emissions(ALWAYS_NOUN_OR_VERB)),
+        ('HMM with uniform', hmm.with_unknown_emissions(UNIFORM)),
         ('HMM with stats', hmm.with_unknown_emissions(probability_of_occurring_once(corpus)))
     ]
 

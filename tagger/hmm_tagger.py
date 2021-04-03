@@ -36,17 +36,18 @@ class HMMTagger(PosTagger):
         transitions, emissions = self.hmm
 
         # Mantiene in memoria solo l'ultima colonna invece di tutta la matrice.
-        viterbi = disjunction_apply(
+        viterbi = [disjunction_apply(
             add, get_row(transitions, "Q0"), emissions[tokens[0]]
-        )
+        )]
         backptr = []
 
         for token in tokens[1:]:
-            viterbi, next_backptr = self._next_col(viterbi, token)
+            next_viterbi, next_backptr = self._next_col(viterbi[-1], token)
+            viterbi.append(next_viterbi)
             backptr.append(next_backptr)
 
-        viterbi = disjunction_apply(add, viterbi, transitions["Qf"])
-        path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
+        viterbi.append(disjunction_apply(add, viterbi[-1], transitions["Qf"]))
+        path_start = max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])
         return retrace_path(backptr, path_start)
 
     def with_unknown_emissions(self, ue):
