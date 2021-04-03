@@ -48,3 +48,7 @@ class HMMTagger(PosTagger):
         viterbi = merge_with(add, viterbi, transitions["Qf"])
         path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
         return retrace_path(backptr, path_start)
+
+    @classmethod
+    def train(cls, *args, **kwargs):
+        return cls(HMM.train(*args, **kwargs))

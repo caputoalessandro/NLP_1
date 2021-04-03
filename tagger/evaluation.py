@@ -36,11 +36,10 @@ def test_performance(corpus: Corpus, taggers: list[PosTagger]):
 
 def main():
     from tagger import BaselineTagger, HMMTagger
-    from tagger.hmm import train_hmm
 
     corpus = Corpus.latin()
     baseline = BaselineTagger.train(corpus)
-    viterbi = HMMTagger(train_hmm(corpus))
+    viterbi = HMMTagger.train(corpus)
 
     test_performance(corpus, [baseline, viterbi])
 

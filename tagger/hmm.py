@@ -1,3 +1,4 @@
+from collections import Counter, defaultdict
 from math import log
 from typing import Dict, NamedTuple
 
@@ -6,7 +7,7 @@ from toolz.curried import merge, valmap, pipe
 from resources import Corpus
 from utils import transpose, dict_with_missing
 
-__all__ = ["HMM", "train_hmm"]
+__all__ = ["HMM"]
 
 
 def div_by_total_log(counts: dict):
@@ -36,7 +37,7 @@ def transition_counts(training_set):
     return counts
 
 
-def smooth_transitions(counts):
+def transitions_smoothing(counts):
     # smoothing: dai conteggio 1 alle transizioni che non avvengono mai
     default_count = dict.fromkeys(counts.keys(), 1)
     return {k: merge(default_count, v) for k, v in counts.items()}
@@ -56,44 +57,51 @@ def emission_counts(training_set):
     return counts
 
 
-def smoothing_counts(dev_set):
-    smoothing_dict = {}
-    count_dict = {}
+def emissions_smoothing_always_noun(_):
+    ret = defaultdict(lambda: log(.0))
+    ret['NOUN'] = log(1)
+    return ret
 
-    # conto occorrenze parole
+
+def emissions_smoothing_noun_or_verb(_):
+    ret = defaultdict(lambda: log(.0))
+    ret['NOUN'] = log(.5)
+    ret['VERB'] = log(.5)
+    return ret
+
+
+def emissions_smoothing_occurring_once(dev_set):
+    word_to_pos = {}
+
     for sentence in dev_set:
         for word in sentence:
-            count_dict.setdefault(word.form, 0)
-            count_dict[word.form] += 1
+            if word.form in word_to_pos:
+                word_to_pos[word.form] = None
+            else:
+                word_to_pos[word.form] = word.upos
 
-    # conto quante volte occorre un pos solo per le parole cche appaiono una volta
-    for sentence in dev_set:
-        for word in sentence:
-            if count_dict[word.form] == 1 and not word.is_multiword():
-                smoothing_dict.setdefault(word.upos, 0)
-                smoothing_dict[word.upos] += 1
-
-    return smoothing_dict
+    return div_by_total_log(Counter(pos for pos in word_to_pos.values() if pos is not None))
 
 
 class HMM(NamedTuple):
     transitions: Dict[str, Dict[str, float]]
     emissions: Dict[str, Dict[str, float]]
 
+    @classmethod
+    def train(cls, corpus: Corpus, emissions_smoothing=emissions_smoothing_occurring_once):
+        transitions = pipe(
+            corpus.train,
+            transition_counts,
+            transitions_smoothing,
+            valmap(div_by_total_log),
+            transpose,
+        )
+        emissions = pipe(corpus.train, emission_counts, valmap(div_by_total_log), transpose)
+        em_smoothing = emissions_smoothing(corpus.dev)
 
-def train_hmm(corpus):
-    transitions = pipe(
-        corpus.train,
-        transition_counts,
-        smooth_transitions,
-        valmap(div_by_total_log),
-        transpose,
-    )
-    emissions = pipe(corpus.train, emission_counts, valmap(div_by_total_log), transpose)
-    smoothing = pipe(corpus.dev, smoothing_counts, div_by_total_log)
-    emissions = dict_with_missing(emissions, smoothing)
+        emissions = dict_with_missing(emissions, em_smoothing)
 
-    return HMM(transitions, emissions)
+        return cls(transitions, emissions)
 
 
 

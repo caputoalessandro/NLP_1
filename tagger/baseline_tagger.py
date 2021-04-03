@@ -6,18 +6,6 @@ from tagger.abc import PosTagger
 from utils import DictWithMissing
 
 
-class BaselineTagger(PosTagger):
-    def __init__(self, model):
-        self.model: Mapping[str, str] = model
-
-    def pos_tags(self, tokens: List[str]):
-        return [self.model[tok] for tok in tokens]
-
-    @classmethod
-    def train(_, corpus):
-        return ud_baseline_tagger(corpus)
-
-
 def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
     model = DictWithMissing(
         (form, max(pos_counts.keys(), key=lambda pos: pos_counts[pos]))
@@ -27,13 +15,20 @@ def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
     return model
 
 
-def ud_baseline_tagger(corpus: Corpus):
-    counts = defaultdict(lambda: defaultdict(lambda: 0))
+class BaselineTagger(PosTagger):
+    def __init__(self, model):
+        self.model: Mapping[str, str] = model
 
-    for sentence in corpus.train:
-        for token in sentence:
-            counts[token.form][token.upos] += 1
+    def pos_tags(self, tokens: List[str]):
+        return [self.model[tok] for tok in tokens]
 
-    model = create_baseline_model(counts)
-    return BaselineTagger(model)
+    @classmethod
+    def train(cls, corpus: Corpus):
+        counts = defaultdict(lambda: defaultdict(lambda: 0))
 
+        for sentence in corpus.train:
+            for token in sentence:
+                counts[token.form][token.upos] += 1
+
+        model = create_baseline_model(counts)
+        return cls(model)
