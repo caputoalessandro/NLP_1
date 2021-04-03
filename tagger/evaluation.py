@@ -1,5 +1,6 @@
 from tagger.abc import PosTagger
 from resources import Corpus
+from tagger.smoothing import ALWAYS_NOUN, ALWAYS_NOUN_OR_VERB, UNIFORM
 
 
 def correct_tags_count_in_sentence(tagger: PosTagger, sentence):
@@ -27,21 +28,27 @@ def correct_tags_ratio_in_corpus(tagger: PosTagger, corpus: Corpus):
     return correct_tags / total_tags
 
 
-def test_performance(corpus: Corpus, taggers: list[PosTagger]):
-    for tagger in taggers:
+def test_performance(corpus: Corpus, taggers: list[tuple[str, PosTagger]]):
+    for name, tagger in taggers:
         performance = correct_tags_ratio_in_corpus(tagger, corpus)
-        tagger_name = type(tagger).__name__
-        print(f"{tagger_name}: {performance:.4%}")
+        print(f"{name}: {performance:.4%}")
 
 
 def main():
     from tagger import BaselineTagger, HMMTagger
+    from tagger.smoothing import probability_of_occurring_once
 
-    corpus = Corpus.latin()
-    baseline = BaselineTagger.train(corpus)
-    viterbi = HMMTagger.train(corpus)
+    corpus = Corpus.greek()
+    hmm = HMMTagger.train(corpus)
+    taggers = [
+        ('Baseline', BaselineTagger.train(corpus)),
+        # ('HMM with NOUN', hmm.with_unknown_emissions(ALWAYS_NOUN)),
+        # ('HMM with NOUN|VERB', hmm.with_unknown_emissions(ALWAYS_NOUN_OR_VERB)),
+        # ('HMM with uniform', hmm.with_unknown_emissions(UNIFORM)),
+        ('HMM with stats', hmm.with_unknown_emissions(probability_of_occurring_once(corpus)))
+    ]
 
-    test_performance(corpus, [baseline, viterbi])
+    test_performance(corpus, taggers)
 
 
 if __name__ == "__main__":

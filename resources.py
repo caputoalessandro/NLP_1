@@ -29,3 +29,6 @@ class Corpus:
     def greek(cls):
         return cls('grc_perseus')
 
+
+POS_TAGS = ["ADJ", "ADP", "ADV", "AUX", "CCONJ", "DET", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT",
+            "SCONJ", "VERB", "X"]

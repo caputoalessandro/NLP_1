@@ -2,7 +2,7 @@ from operator import add
 from typing import List
 from tagger.abc import PosTagger
 from tagger.hmm import HMM
-from utils import get_row, merge_with
+from utils import get_row, disjunction_apply
 
 
 def retrace_path(backptr, start):
@@ -24,19 +24,19 @@ class HMMTagger(PosTagger):
         backptr = {}
 
         for pos in emissions[token].keys():
-            paths_to_pos = merge_with(add, last_col, transitions[pos])
+            paths_to_pos = disjunction_apply(add, last_col, transitions[pos])
             backptr[pos], viterbi[pos] = max(
                 paths_to_pos.items(), key=lambda it: it[1]
             )
 
-        viterbi = merge_with(add, viterbi, emissions[token])
+        viterbi = disjunction_apply(add, viterbi, emissions[token])
         return viterbi, backptr
 
     def pos_tags(self, tokens: List[str]):
         transitions, emissions = self.hmm
 
         # Mantiene in memoria solo l'ultima colonna invece di tutta la matrice.
-        viterbi = merge_with(
+        viterbi = disjunction_apply(
             add, get_row(transitions, "Q0"), emissions[tokens[0]]
         )
         backptr = []
@@ -45,9 +45,12 @@ class HMMTagger(PosTagger):
             viterbi, next_backptr = self._next_col(viterbi, token)
             backptr.append(next_backptr)
 
-        viterbi = merge_with(add, viterbi, transitions["Qf"])
+        viterbi = disjunction_apply(add, viterbi, transitions["Qf"])
         path_start = max(viterbi.keys(), key=lambda k: viterbi[k])
         return retrace_path(backptr, path_start)
+
+    def with_unknown_emissions(self, ue):
+        return HMMTagger(self.hmm.with_unknown_emissions(ue))
 
     @classmethod
     def train(cls, *args, **kwargs):

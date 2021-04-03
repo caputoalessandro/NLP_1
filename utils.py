@@ -1,3 +1,5 @@
+from math import log
+
 
 def transpose(outer):
     result = {k2: {} for inner in outer.values() for k2 in inner.keys()}
@@ -17,28 +19,37 @@ def get_row(outer, key):
     return result
 
 
-def dict_with_missing(data, default):
-    d = DictWithMissing(data)
-    d.missing = default
-    return d
-
-
-def merge_with(fn, d1, d2):
+def disjunction_apply(fn, d1, d2):
     """
     Applica fn ai valori che hanno la stessa chiave in d1 e d2.
     Restituisce un dict dove per ogni chiave in comune il valore è il risultato della funzione.
 
     >>> from operator import add
-    >>> merge_with(add, {'a': 1, 'b': 2, 'c': 2}, {'a': 2, 'b': 2})
+    >>> disjunction_apply(add, {'a': 1, 'b': 2, 'c': 2}, {'a': 2, 'b': 2})
     {'a': 3, 'b': 4}
     """
     return {key: fn(d1[key], d2[key]) for key in d1.keys() & d2.keys()}
 
 
+def counts_to_log_likelihood(counts: dict):
+    """
+    Prende in input un dizionario di conteggi, e restituisce un dizionario dove come valori, al posto di ogni conteggio,
+    c'è il logaritmo del conteggio diviso per il numero totale di elementi.
+    In pratica, converte un dizionario di conteggi in un dizionario di log-likelihood.
+    """
+    denom = log(sum(counts.values()))
+    return {k: log(v) - denom for k, v in counts.items()}
+
+
 class DictWithMissing(dict):
     def __init__(self, *args, **kwargs):
-        self.missing = None
         super().__init__(*args, **kwargs)
+        self.missing = None
 
-    def __missing__(self, _):
+    def with_missing(self, missing):
+        ret = DictWithMissing(self)
+        ret.missing = missing
+        return ret
+
+    def __missing__(self, key):
         return self.missing
