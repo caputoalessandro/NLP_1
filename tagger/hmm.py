@@ -1,8 +1,9 @@
 from typing import NamedTuple
 
-from toolz.curried import merge, valmap, pipe
+from toolz import merge, merge_with
+from toolz.curried import valmap, pipe
 
-from resources import Corpus
+from resources import Corpus, POS_TAGS
 from utils import transpose, DictWithMissing, counts_to_log_likelihood
 
 __all__ = ["HMM"]
@@ -32,8 +33,9 @@ def transition_counts(training_set):
 
 def transitions_smoothing(counts):
     # smoothing: dai conteggio 1 alle transizioni che non avvengono mai
-    default_count = dict.fromkeys(counts.keys(), 1)
-    return {k: merge(default_count, v) for k, v in counts.items()}
+    default_count = dict.fromkeys([*POS_TAGS, "Q0", "Qf"], 1)
+    existing = {k: merge_with(sum, default_count, v) for k, v in counts.items()}
+    return merge(dict.fromkeys(POS_TAGS, default_count), existing)
 
 
 def emission_counts(training_set):
