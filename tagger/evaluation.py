@@ -1,6 +1,5 @@
-from tagger.abc import PosTagger
 from resources import Corpus
-from tagger.smoothing import ALWAYS_NOUN, ALWAYS_NOUN_OR_VERB, UNIFORM
+from tagger.abc import PosTagger
 
 
 def correct_tags_count_in_sentence(tagger: PosTagger, sentence):
@@ -36,7 +35,7 @@ def test_performance(corpus: Corpus, taggers: list[tuple[str, PosTagger]]):
 
 def main():
     from tagger import BaselineTagger, HMMTagger
-    from tagger.smoothing import probability_of_occurring_once
+    from tagger.smoothing import ALWAYS_NOUN, ALWAYS_NOUN_OR_VERB, UNIFORM, probability_of_occurring_once
 
     for corpus in (Corpus.latin(), Corpus.greek()):
         hmm = HMMTagger.train(corpus)

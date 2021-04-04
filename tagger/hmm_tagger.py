@@ -1,44 +1,80 @@
 from operator import add
-from typing import List
+
+from toolz.curried import pipe, valmap
+
+from resources import POS_TAGS, Corpus
 from tagger.abc import PosTagger
-from tagger.hmm import HMM
-from utils import get_row, disjunction_apply
+from utils import (
+    get_row,
+    disjunction_apply,
+    DictWithMissing,
+    counts_to_log_likelihood,
+    transpose,
+)
+
+__all__ = ["HMMTagger"]
 
 
-def retrace_path(backptr, start):
-    path = [start]
-    for col in reversed(backptr):
-        path.append(col[path[-1]])
-    path.reverse()
-    return path
+def transition_counts(training_set):
+    # Smoothing: dai conteggio iniziale 1 a tutte le transizioni
+    counts = {pos: dict.fromkeys([*POS_TAGS, "Qf"], 1) for pos in [*POS_TAGS, "Q0"]}
+
+    for sentence in training_set:
+        sentence = [word for word in sentence if not word.is_multiword()]
+
+        counts["Q0"][sentence[0].upos] += 1
+        for t1, t2 in zip(sentence, sentence[1:]):
+            counts[t1.upos][t2.upos] += 1
+        counts[sentence[-1].upos]["Qf"] += 1
+
+    return counts
+
+
+def emission_counts(training_set):
+    counts = {}
+
+    for sentence in training_set:
+        for word in sentence:
+            if word.upos is None:
+                continue
+            counts.setdefault(word.upos, {}).setdefault(word.form, 0)
+            counts[word.upos][word.form] += 1
+
+    return counts
 
 
 class HMMTagger(PosTagger):
-    def __init__(self, hmm: HMM):
-        self.hmm = hmm
+    def __init__(self, transitions, emissions):
+        self.transitions = transitions
+        self.emissions = emissions
 
-    def _next_col(self, last_col, token):
-        transitions, emissions = self.hmm
+    @classmethod
+    def train(cls, corpus: Corpus):
+        transitions = pipe(
+            corpus.train,
+            transition_counts,
+            valmap(counts_to_log_likelihood),
+            transpose,
+        )
+        emissions = pipe(
+            corpus.train,
+            emission_counts,
+            valmap(counts_to_log_likelihood),
+            transpose,
+        )
+        return cls(transitions, emissions)
 
-        viterbi = {}
-        backptr = {}
+    def with_unknown_emissions(self, ue):
+        return HMMTagger(
+            self.transitions, DictWithMissing(self.emissions).with_missing(ue)
+        )
 
-        for pos in emissions[token].keys():
-            paths_to_pos = disjunction_apply(add, last_col, transitions[pos])
-            backptr[pos], viterbi[pos] = max(
-                paths_to_pos.items(), key=lambda it: it[1]
-            )
+    def pos_tags(self, tokens: list[str]):
+        transitions, emissions = self.transitions, self.emissions
 
-        viterbi = disjunction_apply(add, viterbi, emissions[token])
-        return viterbi, backptr
-
-    def pos_tags(self, tokens: List[str]):
-        transitions, emissions = self.hmm
-
-        # Mantiene in memoria solo l'ultima colonna invece di tutta la matrice.
-        viterbi = [disjunction_apply(
-            add, get_row(transitions, "Q0"), emissions[tokens[0]]
-        )]
+        viterbi = [
+            disjunction_apply(add, get_row(transitions, "Q0"), emissions[tokens[0]])
+        ]
         backptr = []
 
         for token in tokens[1:]:
@@ -47,12 +83,23 @@ class HMMTagger(PosTagger):
             backptr.append(next_backptr)
 
         viterbi.append(disjunction_apply(add, viterbi[-1], transitions["Qf"]))
-        path_start = max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])
-        return retrace_path(backptr, path_start)
 
-    def with_unknown_emissions(self, ue):
-        return HMMTagger(self.hmm.with_unknown_emissions(ue))
+        path = [max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])]
 
-    @classmethod
-    def train(cls, *args, **kwargs):
-        return cls(HMM.train(*args, **kwargs))
+        for col in reversed(backptr):
+            path.insert(0, col[path[0]])
+
+        return path
+
+    def _next_col(self, last_col, token):
+        transitions, emissions = self.transitions, self.emissions
+
+        viterbi = {}
+        backptr = {}
+
+        for pos in emissions[token].keys():
+            paths_to_pos = disjunction_apply(add, last_col, transitions[pos])
+            backptr[pos], viterbi[pos] = max(paths_to_pos.items(), key=lambda it: it[1])
+
+        viterbi = disjunction_apply(add, viterbi, emissions[token])
+        return viterbi, backptr
