@@ -19,16 +19,12 @@ def get_row(outer, key):
     return result
 
 
-def disjunction_apply(fn, d1, d2):
+def sum_values(d1, d2):
     """
-    Applica fn ai valori che hanno la stessa chiave in d1 e d2.
-    Restituisce un dict dove per ogni chiave in comune il valore è il risultato della funzione.
-
-    >>> from operator import add
-    >>> disjunction_apply(add, {'a': 1, 'b': 2, 'c': 2}, {'a': 2, 'b': 2})
-    {'a': 3, 'b': 4}
+    Somma i valori di un dizionario che hanno la stessa chiave.
+    Ignora le chiavi che sono in un dizionario ma non nell'altro.
     """
-    return {key: fn(d1[key], d2[key]) for key in d1.keys() & d2.keys()}
+    return {key: d1[key] + d2[key] for key in d1.keys() & d2.keys()}
 
 
 def counts_to_log_likelihood(counts: dict):

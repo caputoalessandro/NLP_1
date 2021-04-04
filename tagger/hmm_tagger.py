@@ -1,12 +1,10 @@
-from operator import add
-
 from toolz.curried import pipe, valmap
 
 from resources import POS_TAGS, Corpus
 from tagger.abc import PosTagger
 from utils import (
     get_row,
-    disjunction_apply,
+    sum_values,
     DictWithMissing,
     counts_to_log_likelihood,
     transpose,
@@ -72,9 +70,7 @@ class HMMTagger(PosTagger):
     def pos_tags(self, tokens: list[str]):
         transitions, emissions = self.transitions, self.emissions
 
-        viterbi = [
-            disjunction_apply(add, get_row(transitions, "Q0"), emissions[tokens[0]])
-        ]
+        viterbi = [sum_values(get_row(transitions, "Q0"), emissions[tokens[0]])]
         backptr = []
 
         for token in tokens[1:]:
@@ -82,7 +78,7 @@ class HMMTagger(PosTagger):
             viterbi.append(next_viterbi)
             backptr.append(next_backptr)
 
-        viterbi.append(disjunction_apply(add, viterbi[-1], transitions["Qf"]))
+        viterbi.append(sum_values(viterbi[-1], transitions["Qf"]))
 
         path = [max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])]
 
@@ -98,8 +94,8 @@ class HMMTagger(PosTagger):
         backptr = {}
 
         for pos in emissions[token].keys():
-            paths_to_pos = disjunction_apply(add, last_col, transitions[pos])
+            paths_to_pos = sum_values(last_col, transitions[pos])
             backptr[pos], viterbi[pos] = max(paths_to_pos.items(), key=lambda it: it[1])
 
-        viterbi = disjunction_apply(add, viterbi, emissions[token])
+        viterbi = sum_values(viterbi, emissions[token])
         return viterbi, backptr
