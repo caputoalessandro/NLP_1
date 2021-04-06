@@ -1,5 +1,7 @@
 from resources import Corpus
 from tagger.abc import PosTagger
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def correct_tags_count_in_sentence(tagger: PosTagger, sentence):
@@ -28,9 +30,33 @@ def correct_tags_ratio_in_corpus(tagger: PosTagger, corpus: Corpus):
 
 
 def test_performance(corpus: Corpus, taggers: list[tuple[str, PosTagger]]):
+    performance = []
     for name, tagger in taggers:
-        performance = correct_tags_ratio_in_corpus(tagger, corpus)
-        print(f"{name}: {performance:.4%}")
+        performance.append(correct_tags_ratio_in_corpus(tagger, corpus))
+        print(f"{name}: {performance[-1]:.4%}")
+
+    labels = ["BASELINE", "NOUN", "NOUN|VERB", "UNIFORM", "STATS"]
+    data = [x*100 for x in performance]
+
+    x = np.arange(len(labels))
+    width = 0.35
+
+    fig, ax = plt.subplots()
+    rects = ax.bar(x, data, width)
+
+    if corpus.name == "la_llct":
+        ax.set(ylim=[90, 100])
+    else:
+        ax.set(ylim=[50, 100])
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('Ratio')
+    ax.set_title('Correct tag ratio')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+
+    ax.bar_label(rects, padding=5)
+    plt.show()
 
 
 def main():
