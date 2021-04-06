@@ -8,7 +8,8 @@ authors = ["Alessandro Caputo", "Emanuele Gentiletti"]
 python = "^3.9"
 pyconll = "^3.0.4"
 toolz = "^0.11.1"
-numpy = "^1.20.2"
+tabulate = "^0.8.9"
+pandas = "^1.2.3"
 
 [tool.poetry.dev-dependencies]
 
