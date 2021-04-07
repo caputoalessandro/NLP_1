@@ -18,7 +18,7 @@ def transition_counts(training_set):
     # creo un dizionario con ogni pos, per ogni  pos innesto un dizionario con tutti  i pos e inizializzo a uno
     counts = {pos: dict.fromkeys([*POS_TAGS, "Qf"], 1) for pos in [*POS_TAGS, "Q0"]}
 
-    # per ogni pos che incontro nella fraseeffettuo il conteggio
+    # Per ogni pos che incontro nella frase effettuo il conteggio
     for sentence in training_set:
         sentence = [word for word in sentence if not word.is_multiword()]
 
@@ -32,7 +32,7 @@ def transition_counts(training_set):
 
 def emission_counts(training_set):
     counts = {}
-    # conto tutte le emissioni per ogni frase del training set
+    # Conto tutte le emissioni per ogni frase del training set
     for sentence in training_set:
         for word in sentence:
             if word.upos is None:
@@ -71,9 +71,11 @@ class HMMTagger(PosTagger):
 
     def pos_tags(self, tokens: list[str]):
         transitions, emissions = self.transitions, self.emissions
-        # inizializzazine di viterbi prima colonna
-        # effettuciamo la somma (perchè lavoriamo con logaritmi) tra la porbabilità di transazione e la probabilità
+
+        # inizializzazione di viterbi prima colonna
+        # effettuiamo la somma (perchè lavoriamo con logaritmi) tra la probabilità di transizione e la probabilità
         # di emissione
+
         viterbi = [sum_values(get_row(transitions, "Q0"), emissions[tokens[0]])]
         backptr = []
 
@@ -81,18 +83,18 @@ class HMMTagger(PosTagger):
             # prossima colonna di viterbi = prossima colonna calcolata in base a token e ultima colonna
             next_viterbi, next_backptr = self._next_col(viterbi[-1], token)
 
-            #inserisco la nuova colonna in viterbi
+            # inserisco la nuova colonna in viterbi
             viterbi.append(next_viterbi)
 
-            # inserisco il nuovo bakpointer
+            # inserisco il nuovo backpointer
             backptr.append(next_backptr)
 
-        # inserisco  in viterbi l'ultima colonna
+        # inserisco in viterbi l'ultima colonna
+        # sommo a transizioni con pseudotoken finale
         viterbi.append(sum_values(viterbi[-1], transitions["Qf"]))
 
         # calcolo il path andando a prendere quello  con probabilità maggiore
         path = [max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])]
-
 
         for col in reversed(backptr):
             path.insert(0, col[path[0]])
@@ -106,17 +108,16 @@ class HMMTagger(PosTagger):
         viterbi = {}
         backptr = {}
 
-        # per tutti i pos nelle emissioni
         for pos in emissions[token].keys():
 
-            # calcolo tutti  i percorsi che vanno  dal pos precedente al pos odierno
+            # calcolo tutti i percorsi che vanno  dal pos precedente al pos corrente
             paths_to_pos = sum_values(last_col, transitions[pos])
 
-            # tra tutti i  path scelgo quello con probabilità maggiore, inserisco il pos all'interno della colonna e del
-            # bakpointer
+            # tra tutti i path scelgo quello con probabilità maggiore, inserisco il pos all'interno della colonna e del
+            # backpointer
             backptr[pos], viterbi[pos] = max(paths_to_pos.items(), key=lambda it: it[1])
 
-        #  a questo punto avrò creato la nuova colonna di viterbi che andrò a inserire nella matrice di viterbi
+        # a questo punto avrò creato la nuova colonna di viterbi che andrò a inserire nella matrice di viterbi
         # sommando però le emissioni
         viterbi = sum_values(viterbi, emissions[token])
         return viterbi, backptr
