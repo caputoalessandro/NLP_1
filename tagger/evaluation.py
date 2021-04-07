@@ -2,7 +2,7 @@ from collections import Counter
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tabulate import tabulate
+import tabulate
 
 from resources import Corpus
 from tagger.abc import PosTagger
@@ -42,7 +42,7 @@ def total_test_tokens(corpus):
 
 def format_errors(errors: Counter):
     return [
-        f".{count:>5} \u2716 {pred} \u2713 {correct}"
+        f"{count:>5} {pred} invece di {correct}"
         for (pred, correct), count in errors.most_common(5)
     ]
 
@@ -106,9 +106,9 @@ def main():
             for errors in tagger_errors
         ]
 
-        print(f"\nCorpus {corpus.name}\n")
+        print(f"\n### Corpus {corpus.name} ###\n")
         print(
-            tabulate(
+            tabulate.tabulate(
                 zip(tagger_names, tagger_accuracies),
                 headers=("Tagger", "Accuracy"),
                 floatfmt=".2%",
@@ -116,16 +116,22 @@ def main():
         )
 
         print("\nMost common errors\n")
-        print(
-            tabulate(
-                {
-                    name: format_errors(errors)
-                    for name, errors in zip(tagger_names, tagger_errors)
-                },
-                headers="keys",
+
+        for tagger_name, errors in zip(tagger_names, tagger_errors):
+            print(f"\n{tagger_name}\n")
+            total_errors = sum(errors.values())
+
+            print(
+                tabulate.tabulate(
+                    [
+                        (err_count / total_errors, predicted, correct)
+                        for (predicted, correct), err_count in errors.most_common(5)
+                    ],
+                    headers=["Errori", "Predetto", "Corretto"],
+                    floatfmt=".2%"
+                )
             )
-        )
-        
+
         plot_accuracies(corpus, tagger_accuracies)
 
 
