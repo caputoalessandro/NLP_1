@@ -1,5 +1,7 @@
 from collections import Counter
 
+import matplotlib.pyplot as plt
+import numpy as np
 from tabulate import tabulate
 
 from resources import Corpus
@@ -38,15 +40,36 @@ def total_test_tokens(corpus):
     )
 
 
-def accuracy(all_errors: Counter, total_tags: int):
-    return sum(all_errors.values()) / total_tags
-
-
 def format_errors(errors: Counter):
     return [
         f".{count:>5} \u2716 {pred} \u2713 {correct}"
         for (pred, correct), count in errors.most_common(5)
     ]
+
+
+def plot_accuracies(corpus: Corpus, accuracies: list[float]):
+    labels = ["BASELINE", "NOUN", "NOUN|VERB", "UNIFORM", "STATS"]
+    data = [x * 100 for x in accuracies]
+
+    x = np.arange(len(labels))
+    width = 0.35
+
+    fig, ax = plt.subplots()
+    rects = ax.bar(x, data, width)
+
+    if corpus.name == "la_llct":
+        ax.set(ylim=[90, 100])
+    else:
+        ax.set(ylim=[50, 100])
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel("Accuracy")
+    ax.set_title("Correct tag ratio")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+
+    ax.bar_label(rects, padding=5)
+    plt.show()
 
 
 def main():
@@ -102,6 +125,8 @@ def main():
                 headers="keys",
             )
         )
+        
+        plot_accuracies(corpus, tagger_accuracies)
 
 
 if __name__ == "__main__":
