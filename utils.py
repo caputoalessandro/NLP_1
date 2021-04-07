@@ -27,11 +27,11 @@ def sum_values(d1, d2):
     return {key: d1[key] + d2[key] for key in d1.keys() & d2.keys()}
 
 
-def counts_to_log_likelihood(counts: dict):
+def counts_to_log_probability(counts: dict):
     """
     Prende in input un dizionario di conteggi, e restituisce un dizionario dove come valori, al posto di ogni conteggio,
     c'è il logaritmo del conteggio diviso per il numero totale di elementi.
-    In pratica, converte un dizionario di conteggi in un dizionario di log-likelihood.
+    In pratica, converte un dizionario di conteggi in un dizionario di logaritmi di probabilità.
     """
     denom = log(sum(counts.values()))
     return {k: log(v) - denom for k, v in counts.items()}

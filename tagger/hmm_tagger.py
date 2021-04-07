@@ -6,7 +6,7 @@ from utils import (
     get_row,
     sum_values,
     DictWithMissing,
-    counts_to_log_likelihood,
+    counts_to_log_probability,
     transpose,
 )
 
@@ -53,13 +53,13 @@ class HMMTagger(PosTagger):
         transitions = pipe(
             corpus.train,
             transition_counts,
-            valmap(counts_to_log_likelihood),
+            valmap(counts_to_log_probability),
             transpose,
         )
         emissions = pipe(
             corpus.train,
             emission_counts,
-            valmap(counts_to_log_likelihood),
+            valmap(counts_to_log_probability),
             transpose,
         )
         return cls(transitions, emissions)
