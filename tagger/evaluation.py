@@ -40,13 +40,6 @@ def total_test_tokens(corpus):
     )
 
 
-def format_errors(errors: Counter):
-    return [
-        f"{count:>5} {pred} invece di {correct}"
-        for (pred, correct), count in errors.most_common(5)
-    ]
-
-
 def plot_accuracies(corpus: Corpus, accuracies: list[float]):
     labels = ["BASELINE", "NOUN", "NOUN|VERB", "UNIFORM", "STATS"]
     data = [x * 100 for x in accuracies]
@@ -118,7 +111,6 @@ def main():
         print("\nMost common errors\n")
 
         for tagger_name, errors in zip(tagger_names, tagger_errors):
-            print(f"\n{tagger_name}\n")
             total_errors = sum(errors.values())
 
             print(
@@ -128,9 +120,12 @@ def main():
                         for (predicted, correct), err_count in errors.most_common(5)
                     ],
                     headers=["Errori", "Predetto", "Corretto"],
+                    tablefmt="markdown",
                     floatfmt=".2%"
                 )
             )
+
+            print(f"\n:{tagger_name}\n")
 
         plot_accuracies(corpus, tagger_accuracies)
 

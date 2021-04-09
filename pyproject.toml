@@ -5,11 +5,11 @@ description = ""
 authors = ["Alessandro Caputo", "Emanuele Gentiletti"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.10"
 pyconll = "^3.0.4"
 toolz = "^0.11.1"
-tabulate = "^0.8.9"
-pandas = "^1.2.3"
+tabulate = {extras = ["widechars"], version = "^0.8.9"}
+matplotlib = "^3.4.1"
 
 [tool.poetry.dev-dependencies]
 
