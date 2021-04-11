@@ -247,22 +247,27 @@ HMM: Always NOUN                  95.98%
 
 La performance media dei tagger sul corpus latino è del 96.46%. In questo caso
 la performance migliore è stata raggiunta dal tagger STATS con il 97,22% di
-precisione. Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
+precisione. 
+
+Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
 infine NOUN. Notiamo che il tagger STATS è stato l'unico a superare la
 baseline, mentre gli altri tagger hanno avuto performance più basse. 
 
 La baseline sul corpus latino è molto più alta della baseline sul corpus greco.
 Per questo motivo, sul corpus latino è stato difficile superare la baseline, mentre per il
 corpus greco è stato molto più semplice.
+
 L'utilizzo di tecniche di smoothing sul corpus latino,
 non ci ha garantito prestazioni migliori: Solo un tagger ha superato la baseline e ha migliorato le prestazioni, 
 gli altri tagger le hanno peggiorate. 
 Sul corpus greco, lo smoothing non solo ci ha garantito prestazioni migliori, 
 ma i miglioramenti sono stati sostanziali. 
+
 In media la differenza di prestazioni tra i tagger e la baseline 
 è del +13,42% sul corpus greco mentre è del -1,48% sul corpus latino.
-Possiamo dire che per baseline basse anche tecniche di smoothing  semplici migliorano
-le prestazioni, per baseline alte tecniche poco raffinate possono portare a dei peggioramenti. 
+
+Possiamo dire che se la baseline ha una percentuale relativamente bassa, anche tecniche di smoothing semplici portano a migliormenti
+delle prestazioni. Se le percentuali della baseline sono alte, tecniche poco raffinate possono portare a dei peggioramenti. 
 All'aumentare della baseline quindi, sono necessarie tecniche di smoothing sempre più raffinate 
 per aumentare le performance del sistema.
 
@@ -332,7 +337,7 @@ parole apparse una sola volta, fino al 48% se etichettiamo le parole
 sconosciute sempre come NOUN. 
 
 Negli errori più comuni commessi nella baseline, PROPN non è elencato. 
-Quindi è raro che il tagger faccia un errata predizione sui PROPN. 
+Ovvero è raro che il tagger faccia un errata predizione sui PROPN. 
 Questo perché senza effettuare smoothing,
 il tagger tende a etichettare le parole sconosciute come PROPN.
 
@@ -404,10 +409,9 @@ alzandone la percentuale di errore. Pur avendo una percentuale di errore sui ver
 commettiamo un errore bassissimo sui nomi migliorando l'accuracy. Si passa dal 61% al 73%. 
 
 Le  performance migliori si ottengono etichettando le parole sconosciute come
-nomi o verbi. In questo modo pur aumentando la percentuale di errori sugli avverbi,
+nomi o verbi. In questo modo pur aumentando la percentuale di errore sugli avverbi,
 miglioriamo quelle su nomi e verbi raggiungendo l'accuratezza del 76,46%. 
 
 In generale vediamo che con le altre tecniche di smoothing, abbassando l'errore
-sui nomi e sui verbi, si alza la percentuale di errori sugli avverbi. Il tagger migliore è
-quello che ha ottenuto una percentuale più bassa di errore sugli avverbi.
+sui nomi e sui verbi, si alza la percentuale di errore sugli avverbi. 
 
