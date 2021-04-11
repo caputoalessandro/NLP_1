@@ -42,8 +42,7 @@ def total_test_tokens(corpus):
 
 def plot_accuracies(corpus: Corpus, accuracies: list[float]):
     labels = [
-        "BL NOUN",
-        "BL PROPN",
+        "BASELINE",
         "NOUN",
         "NOUN | VERB",
         "UNIFORM",
@@ -86,7 +85,6 @@ def main():
         baseline = BaselineTagger.train(corpus)
         taggers = [
             baseline.with_default_for_missing("NOUN"),
-            baseline.with_default_for_missing("PROPN"),
             hmm.with_unknown_emissions(ALWAYS_NOUN),
             hmm.with_unknown_emissions(NOUN_OR_VERB),
             hmm.with_unknown_emissions(UNIFORM),
@@ -94,8 +92,7 @@ def main():
         ]
 
         tagger_names = [
-            "Baseline (NOUN)",
-            "Baseline (PROPN)",
+            "Baseline",
             "HMM: Always NOUN",
             "HMM: 0.5 NOUN, 0.5 VERB",
             "HMM: 1/#PosTags",
