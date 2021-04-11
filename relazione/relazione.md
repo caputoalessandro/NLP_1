@@ -219,9 +219,7 @@ confrontabile con gli altri.
 
 ## Performance
 
-### Greco
-
-![Accuratezza dei tagger nel corpus in greco.](../grc_perseus.svg){width=70%}
+![Accuratezza dei tagger nel corpus in greco.](grc_perseus.svg){width=70%}
 
 Tagger                          Accuracy
 ----------------------------  ----------
@@ -231,17 +229,9 @@ HMM: 1/#PosTags                   73.96%
 HMM: Always NOUN                  73.62%
 Baseline                          61.65%
 
-Sul corpus greco la performance media dei tagger HMM è del 75.04%.
-La performance migliore è stata ottenuta dal tagger che ha etichettato le
-parole sconosciute come nomi o verbi (NOUN | VERB), seguito dal tagger che ha
-assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
-corpus (STATS). I tagger NOUN e UNIFORM invece si discostano dagli altri due
-ottenendo performance più basse. Tutti i tagger hanno ottenuto prestazioni
-migliori rispetto alla baseline.
 
-### Latino
 
-![Accuratezza dei tagger nel corpus in latino.](../la_llct.svg){width=70%}
+![Accuratezza dei tagger nel corpus in latino.](la_llct.svg){width=70%}
 
 Tagger                          Accuracy
 ----------------------------  ----------
@@ -251,33 +241,20 @@ HMM: 1/#PosTags                   96.42%
 HMM: 0.5 NOUN, 0.5 VERB           96.23%
 HMM: Always NOUN                  95.98%
 
+Sul corpus greco la performance media dei tagger HMM è del 75.04%.
+La performance migliore è stata ottenuta dal tagger che ha etichettato le
+parole sconosciute come nomi o verbi (NOUN | VERB), seguito dal tagger che ha
+assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
+corpus (STATS). I tagger NOUN e UNIFORM invece si discostano dagli altri due
+ottenendo performance più basse. Tutti i tagger hanno ottenuto prestazioni
+migliori rispetto alla baseline.
+
 La performance media dei tagger sul corpus latino è del 96.46%. In questo caso
 la performance migliore è stata raggiunta dal tagger STATS con il 97,22% di
 precisione. 
 
-Seguono rispetto alle performance i tagger UNIFORM, NOUN | VERB e
-infine NOUN. Notiamo che il tagger STATS è stato l'unico a superare la
-baseline, mentre gli altri tagger hanno avuto performance più basse. 
-
-La baseline sul corpus latino è molto più alta della baseline sul corpus greco.
-Per questo motivo nel corpus latino è stato difficile superare la baseline,
-mentre nel corpus greco è stato molto più semplice.
-
-L'utilizzo di tecniche di smoothing sul corpus latino non ha sempre garantito
-prestazioni migliori: solo un tagger ha superato la baseline e ha migliorato le
-prestazioni, mentre gli altri tagger le hanno peggiorate. Sul corpus greco lo
-smoothing non solo ha sempre garantito prestazioni migliori, ma i miglioramenti
-sono stati sostanziali.
-
-In media la differenza di prestazioni tra i tagger e la baseline 
-è del +13,42% sul corpus greco mentre è del -1,48% sul corpus latino.
-
-Possiamo dire che se la baseline ha una percentuale relativamente bassa, anche
-tecniche di smoothing semplici portano a miglioramenti delle prestazioni. Se le
-percentuali della baseline sono alte, tecniche poco raffinate possono portare a
-dei peggioramenti. All'aumentare della baseline quindi, sono necessarie
-tecniche di smoothing sempre più raffinate per aumentare le performance del
-sistema.
+Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
+infine NOUN. Anche in questo caso tutti i tagger HMM hanno superato la baseline.
 
 ## Errori più comuni
 
@@ -336,30 +313,23 @@ sistema.
 \end{tabular}
 \end{center}
 
-Dalle tabelle degli errori più comuni per il corpus latino possiamo vedere che
-non utilizzando tecniche di smoothing, le percentuali di errore sono abbastanza
-uniformi sui PoS. In particolare gli errori sono stati fatti maggiormente su
-VERB, DET e NOUN con valori intorno al 16%.
+Dalle tabelle degli errori più comuni per il corpus latino,  possiamo vedere che
+non utilizzando tecniche di smoothing, si riscontra una percentuale di errore molto
+alta sulla predizione di PROPN. 
 
-Utilizzando tecniche di smoothing invece gli errori si concentrano maggiormente
-su PROPN, con percentuali che vanno dal 14% se utilizziamo la tecnica delle
-parole apparse una sola volta, fino al 48% se etichettiamo le parole
-sconosciute sempre come NOUN. 
+Utilizzando tecniche di smoothing in generale gli errori commessi su PROPN sono diminuiti,
+ma non per tutti i tagger. Il tagger always NOUN, nonostante commetta una quantità di errori su PROPN
+più alta rispetto alla baseline (passando dal 42% al 48%), diminuisce gli errori di predizione su tutti gli altri POS
+aumentando comunque l'accuracy.
+ 
+Gli errori più comuni dei tagger tagger UNIFORM e NOUN|VERB sono stati principalmente due, etichettare i nomi propri 
+come nomi
+o come verbi. Le percentuali di errore sono state  comunque molto più basse rispetto alla baseline arrivando ad
+un accuracy del 96,23% per NOUN|VERB e 96,42% per UNIFORM.
 
-Negli errori più comuni commessi nella baseline, PROPN non è elencato. 
-Ovvero è raro che il tagger faccia un errata predizione sui PROPN. Questo
-perché senza effettuare smoothing, il tagger tende a etichettare le parole
-sconosciute come PROPN.
-
-In generale lo smoothing ha diminuito l'errore su VERB, DET e NOUN ma l'ha
-aumentato su PROPN, tant'è che il tagger che ha ottenuto il 48% di errore su
-PROPN ha un accuracy al di sotto della baseline.
-
-Vediamo infine che il tagger migliore è quello che ha saputo contenere gli
-errori sui nomi propri, l'errore di cui soffrono di più i tagger che utilizzano
-altre tecniche di smoothing.
-
-\newpage
+Infine, il tagger STATS si è dimostrato il tagger migliore per la lingua latina in questo esperimento, 
+arrivando a una percentuale del 97,22%. Ciò è in linea con le aspettative essendo il tagger che ha utilizzato 
+una tecnica di smoothing più raffinata rispetto alle altre.
 
 ### Greco
 
@@ -412,20 +382,27 @@ altre tecniche di smoothing.
 \end{tabular}
 \end{center}
 
-Sul corpus greco la baseline commette errori maggiormente su NOUN e VERB con il
-30% su NOUN e 24,5% su VERB. Utilizzando tecniche di smoothing i risultati sono
-variabili.
+Nella baseline calcolata sul corpus in  lingua greca, gli errori più comuni sono due,
+ovvero VERB e ADV con il 35% e il 20%.
 
-Etichettando le parole sconosciute come nomi, effettuiamo più errori sui verbi 
-alzandone la percentuale di errore. Pur avendo una percentuale di errore sui
-verbi del 35% commettiamo un errore bassissimo sui nomi migliorando l'accuracy.
-Si passa dal 61% al 73%. 
+I tagger che hanno utilizzato lo smoothing in generale hanno diminuito di molto 
+gli errori effettuati sul pos VERB, ad eccezzione del tagger always NOUN. Questo
+tagger sembra aver aumentato sensibilmente gli errori su VERB e ADJ diminuendo
+l'errore compiuto sugli altri POS. Il tagger always NOUN è quello che si discosta
+dimeno dalla baseline, ottenendo unaccuracy del 73,62% rispetto al 73,52% della baseline.
 
-Le  performance migliori si ottengono etichettando le parole sconosciute come
-nomi o verbi. In questo modo pur aumentando la percentuale di errore sugli
-avverbi, miglioriamo quelle su nomi e verbi raggiungendo l'accuratezza del
-76,46%. 
+Il tagger STATS ha diminuito moltissimo gli errori compiuti su VERB (infatti non è rappresentato in tabella)
+ma ha peggiorato le prestazioni sul tag NOUN. In partiolare ha effettuato un errore del 22,7%, ha prestazioni simili
+anche per quanto riguarda le percentuali che riguardano ADV. 
 
-In generale vediamo che con le altre tecniche di smoothing, abbassando l'errore
-sui nomi e sui verbi, si alza la percentuale di errore sugli avverbi. 
+Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse rispetto a tutti i POS,
+ma questo non l'ha reso ill tagger migliore. Anche questo tagger come STATS ha ottenuto percentuali di 
+errore più alte per i pos NOUN e ADV
+
+IL tagger migliore risulta essere NOUN|VERB le cui percentuali di errore risultano essere maggiori per ADV.
+Questo tagger ha raggiunto un accuracy molto simile al tagger STATS con il 76,47%.
+
+In generale abbiamo visto come le percentuali di errore rispetto ai singoli POS siano diversamente distribuite
+da una lingua all'altra. Nella lingua latina si sono riscontrati problemi maggiormente sui verbi e sui nomi prori. 
+Per il greco antico abbiamo ottenuto errori maggiori su verbi, avverbi e aggettivi.
 
