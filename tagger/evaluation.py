@@ -3,6 +3,8 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
 import tabulate
+import matplotlib.ticker as mtick
+import toolz
 
 from resources import Corpus
 from tagger.abc import PosTagger
@@ -40,35 +42,47 @@ def total_test_tokens(corpus):
     )
 
 
-def plot_accuracies(corpus: Corpus, accuracies: list[float]):
+cm = 1 / 2.54
+
+
+def plot_accuracies(accuracies: dict[str, list[float]]):
     labels = [
         "BASELINE",
         "NOUN",
-        "NOUN | VERB",
+        "N | V",
         "UNIFORM",
         "STATS",
     ]
-    data = [x * 100 for x in accuracies]
-
     x = np.arange(len(labels))
     width = 0.35
 
-    fig, ax = plt.subplots()
-    rects = ax.bar(x, data, width)
+    fig, axs = plt.subplots(1, 2, figsize=(22 * cm, 10 * cm))
 
-    if corpus.name == "la_llct":
-        ax.set(ylim=[90, 100])
-    else:
-        ax.set(ylim=[50, 100])
+    for ax, (corpus_name, corpus_accuracies) in zip(axs, accuracies.items()):
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel("Accuracy")
-    ax.set_title(corpus.name)
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+        sorted_acc = sorted(zip(corpus_accuracies, labels))
+        acc, lb = [[x[0] for x in sorted_acc], [x[1] for x in sorted_acc]]
 
-    ax.bar_label(rects, padding=5)
-    plt.show()
+        data = [x * 100 for x in acc]
+        rects = ax.bar(x, data, width)
+
+        if corpus_name == "la_llct":
+            ax.set(ylim=[90, 100])
+        else:
+            ax.set(ylim=[50, 100])
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        if corpus_name == "la_llct":
+            ax.set_ylabel("Accuracy")
+
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
+        ax.set_title(corpus_name)
+        ax.set_xticks(x)
+        ax.set_xticklabels(lb)
+
+        ax.bar_label(rects, fmt="%.2f", padding=5)
+    plt.plot()
+    plt.savefig('accuracies.svg')
 
 
 def main():
@@ -79,6 +93,8 @@ def main():
         UNIFORM,
         probability_of_occurring_once,
     )
+
+    accuracies = {}
 
     for corpus in (Corpus.latin(), Corpus.greek()):
         hmm = HMMTagger.train(corpus)
@@ -101,7 +117,7 @@ def main():
 
         tagger_errors = [corpus_errors(tagger, corpus) for tagger in taggers]
         total_tokens = total_test_tokens(corpus)
-        tagger_accuracies = [
+        accuracies[corpus.name] = [
             (total_tokens - sum(errors.values())) / total_tokens
             for errors in tagger_errors
         ]
@@ -110,7 +126,7 @@ def main():
         print(
             tabulate.tabulate(
                 sorted(
-                    zip(tagger_names, tagger_accuracies),
+                    zip(tagger_names, accuracies[corpus.name]),
                     key=lambda it: it[1],
                     reverse=True,
                 ),
@@ -133,10 +149,11 @@ def main():
                     ],
                     headers=["Errori", "Corretto", "Predetto"],
                     floatfmt=".2%",
+                    tablefmt="latex",
                 )
             )
 
-        plot_accuracies(corpus, tagger_accuracies)
+    plot_accuracies(accuracies)
 
 
 if __name__ == "__main__":
