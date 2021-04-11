@@ -225,7 +225,9 @@ Sul corpus greco la performance media dei tagger HMM è del 75.04%.
 La performance migliore è stata ottenuta dal tagger che ha etichettato le
 parole sconosciute come nomi o verbi (NOUN | VERB), seguito dal tagger che ha
 assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
-corpus (STATS). I tagger NOUN e UNIFORM invece si discostano dagli altri due
+corpus (STATS). 
+
+I tagger NOUN e UNIFORM invece si discostano dagli altri due
 ottenendo performance più basse. Tutti i tagger hanno ottenuto prestazioni
 migliori rispetto alla baseline.
 
@@ -302,13 +304,12 @@ ma non per tutti i tagger. Il tagger always NOUN, nonostante commetta una quanti
 più alta rispetto alla baseline (passando dal 42% al 48%), diminuisce gli errori di predizione su tutti gli altri POS
 aumentando comunque l'accuracy.
  
-Gli errori più comuni dei tagger tagger UNIFORM e NOUN|VERB sono stati principalmente due, etichettare i nomi propri 
-come nomi
-o come verbi. Le percentuali di errore sono state  comunque molto più basse rispetto alla baseline arrivando ad
+Gli errori più comuni dei tagger UNIFORM e NOUN|VERB sono stati principalmente due, etichettare i nomi propri 
+come nomi o come verbi. Le percentuali di errore sono state  comunque molto più basse rispetto alla baseline arrivando ad
 un accuracy del 96,23% per NOUN|VERB e 96,42% per UNIFORM.
 
 Infine, il tagger STATS si è dimostrato il tagger migliore per la lingua latina in questo esperimento, 
-arrivando a una percentuale del 97,22%. Ciò è in linea con le aspettative essendo il tagger che ha utilizzato 
+arrivando a una percentuale del 97,22%. Ciò è in linea con le aspettative, essendo il tagger che ha utilizzato 
 una tecnica di smoothing più raffinata rispetto alle altre.
 
 ### Greco
@@ -368,21 +369,23 @@ ovvero VERB e ADV con il 35% e il 20%.
 I tagger che hanno utilizzato lo smoothing in generale hanno diminuito di molto 
 gli errori effettuati sul pos VERB, ad eccezzione del tagger always NOUN. Questo
 tagger sembra aver aumentato sensibilmente gli errori su VERB e ADJ diminuendo
-l'errore compiuto sugli altri POS. Il tagger always NOUN è quello che si discosta
-dimeno dalla baseline, ottenendo unaccuracy del 73,62% rispetto al 73,52% della baseline.
+l'errore compiuto sugli altri POS.
+
+Il tagger always NOUN è quello che si discosta
+meno dalla baseline, ottenendo un accuracy del 73,62% rispetto al 73,52% della baseline.
 
 Il tagger STATS ha diminuito moltissimo gli errori compiuti su VERB (infatti non è rappresentato in tabella)
-ma ha peggiorato le prestazioni sul tag NOUN. In partiolare ha effettuato un errore del 22,7%, ha prestazioni simili
-anche per quanto riguarda le percentuali che riguardano ADV. 
+ma ha peggiorato le prestazioni sul tag NOUN. In partiolare ha ottenuto un errore del 22,7% su NOUN 
+e ha percetuali simili anche per ADV. 
 
 Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse rispetto a tutti i POS,
-ma questo non l'ha reso ill tagger migliore. Anche questo tagger come STATS ha ottenuto percentuali di 
-errore più alte per i pos NOUN e ADV
+ma questo non l'ha reso il tagger migliore. Anche per questo tagger come STATS le percentuali di 
+errore più alte sono sui pos NOUN e ADV.
 
-IL tagger migliore risulta essere NOUN|VERB le cui percentuali di errore risultano essere maggiori per ADV.
-Questo tagger ha raggiunto un accuracy molto simile al tagger STATS con il 76,47%.
+IL tagger migliore risulta essere NOUN|VERB la cui percentuale di errore maggiore è su ADV.
+Questo tagger ha raggiunto un accuracy molto simile al tagger STATS  ottenendo una percentuale del 76,47%.
 
 In generale abbiamo visto come le percentuali di errore rispetto ai singoli POS siano diversamente distribuite
-da una lingua all'altra. Nella lingua latina si sono riscontrati problemi maggiormente sui verbi e sui nomi prori. 
+da una lingua all'altra. Nella lingua latina si sono riscontrati errori maggiormente sui verbi e sui nomi propri. 
 Per il greco antico abbiamo ottenuto errori maggiori su verbi, avverbi e aggettivi.
 
