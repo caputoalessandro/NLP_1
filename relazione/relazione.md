@@ -219,27 +219,7 @@ confrontabile con gli altri.
 
 ## Performance
 
-![Accuratezza dei tagger nel corpus in greco.](grc_perseus.svg){width=70%}
-
-Tagger                          Accuracy
-----------------------------  ----------
-HMM: 0.5 NOUN, 0.5 VERB           76.46%
-HMM: Stats on occurring once      76.27%
-HMM: 1/#PosTags                   73.96%
-HMM: Always NOUN                  73.62%
-Baseline                          61.65%
-
-
-
-![Accuratezza dei tagger nel corpus in latino.](la_llct.svg){width=70%}
-
-Tagger                          Accuracy
-----------------------------  ----------
-HMM: Stats on occurring once      97.22%
-Baseline                          96.83%
-HMM: 1/#PosTags                   96.42%
-HMM: 0.5 NOUN, 0.5 VERB           96.23%
-HMM: Always NOUN                  95.98%
+![Accuracy dei tagger nei corpus.](../accuracies.svg)
 
 Sul corpus greco la performance media dei tagger HMM è del 75.04%.
 La performance migliore è stata ottenuta dal tagger che ha etichettato le
