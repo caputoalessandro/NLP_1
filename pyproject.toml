@@ -10,6 +10,8 @@ pyconll = "^3.0.4"
 toolz = "^0.11.1"
 tabulate = {extras = ["widechars"], version = "^0.8.9"}
 matplotlib = "^3.4.1"
+pandas = {extras = ["jinja2"], version = "^1.2.3"}
+Jinja2 = "^2.11.3"
 
 [tool.poetry.dev-dependencies]
 

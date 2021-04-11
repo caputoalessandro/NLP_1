@@ -41,7 +41,7 @@ def total_test_tokens(corpus):
 
 
 def plot_accuracies(corpus: Corpus, accuracies: list[float]):
-    labels = ["BASELINE", "NOUN", "NOUN|VERB", "UNIFORM", "STATS"]
+    labels = ["BASELINE", "NOUN", "NOUN | VERB", "UNIFORM", "STATS"]
     data = [x * 100 for x in accuracies]
 
     x = np.arange(len(labels))
@@ -57,7 +57,7 @@ def plot_accuracies(corpus: Corpus, accuracies: list[float]):
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel("Accuracy")
-    ax.set_title("Correct tag ratio")
+    ax.set_title(corpus.name)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
 
@@ -102,7 +102,11 @@ def main():
         print(f"\n### Corpus {corpus.name} ###\n")
         print(
             tabulate.tabulate(
-                zip(tagger_names, tagger_accuracies),
+                sorted(
+                    zip(tagger_names, tagger_accuracies),
+                    key=lambda it: it[1],
+                    reverse=True,
+                ),
                 headers=("Tagger", "Accuracy"),
                 floatfmt=".2%",
             )
@@ -113,19 +117,17 @@ def main():
         for tagger_name, errors in zip(tagger_names, tagger_errors):
             total_errors = sum(errors.values())
 
+            print(f"\n{tagger_name}\n")
             print(
                 tabulate.tabulate(
                     [
-                        (err_count / total_errors, predicted, correct)
+                        (err_count / total_errors, correct, predicted)
                         for (predicted, correct), err_count in errors.most_common(5)
                     ],
-                    headers=["Errori", "Predetto", "Corretto"],
-                    tablefmt="markdown",
+                    headers=["Errori", "Corretto", "Predetto"],
                     floatfmt=".2%"
                 )
             )
-
-            print(f"\n:{tagger_name}\n")
 
         plot_accuracies(corpus, tagger_accuracies)
 
