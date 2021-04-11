@@ -331,9 +331,10 @@ su PROPN, con percentuali che vanno dal 14% se utilizziamo la tecnica delle
 parole apparse una sola volta, fino al 48% se etichettiamo le parole
 sconosciute sempre come NOUN. 
 
-Nella baseline PROPN non è nemmeno elencato tra gli errori più comuni, questo
-perché senza effettuare smoothing il tagger tende a etichettare le parole
-sconosciute come PROPN.
+Negli errori più comuni commessi nella baseline, PROPN non è elencato. 
+Quindi è raro che il tagger faccia un errata predizione sui PROPN. 
+Questo perché senza effettuare smoothing,
+il tagger tende a etichettare le parole sconosciute come PROPN.
 
 In generale lo smoothing ha diminuito l'errore su VERB, DET e NOUN ma l'ha
 aumentato su PROPN, tant'è che il tagger che ha ottenuto il 48% di errore su
@@ -398,15 +399,15 @@ Sul corpus greco la baseline commette errori maggiormente su NOUN e VERB con il
 30% su NOUN e 24,5% su VERB. Utilizzando tecniche di smoothing i risultati sono
 variabili.
 
-Etichettando le parole sconosciute come nomi, spostiamo gli errori dai nomi ai
-verbi. Pur aumentando l'errore sui verbi (35%) commettiamo un errore bassissimo
-sui nomi migliorando l'accuracy, infatti si passa dal 61% al 73%. 
+Etichettando le parole sconosciute come nomi, effettuiamo più errori sui verbi 
+alzandone la percentuale di errore. Pur avendo una percentuale di errore sui verbi del 35% 
+commettiamo un errore bassissimo sui nomi migliorando l'accuracy. Si passa dal 61% al 73%. 
 
 Le  performance migliori si ottengono etichettando le parole sconosciute come
-nomi o verbi. In questo modo pur peggiorando le prestazioni sugli avverbi,
-miglioriamo quelle sui nomi e i verbi raggiungendo l'accuratezza del 76,46%. 
+nomi o verbi. In questo modo pur aumentando la percentuale di errori sugli avverbi,
+miglioriamo quelle su nomi e verbi raggiungendo l'accuratezza del 76,46%. 
 
 In generale vediamo che con le altre tecniche di smoothing, abbassando l'errore
-sui nomi e sui verbi, si alza l'errore sugli avverbi. Il tagger migliore è
+sui nomi e sui verbi, si alza la percentuale di errori sugli avverbi. Il tagger migliore è
 quello che ha ottenuto una percentuale più bassa di errore sugli avverbi.
 
