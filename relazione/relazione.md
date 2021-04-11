@@ -26,9 +26,8 @@ Per implementare il tagger abbiamo creato una classe `HMMTagger` (in
 probabilità di transizione ed emissione. Come struttura dati per rappresentare
 vettori e matrici abbiamo usato i dizionari. In questo modo non abbiamo
 sfruttato la vettorizzazione delle operazioni, ma siamo comunque rimasti
-soddisfatti dalla performance dell'algoritmo (l'addestramento
-e il test su entrambi i corpus richiedono circa 15 secondi sulle nostre
-macchine).
+soddisfatti dalla performance dell'algoritmo (l'addestramento e il test su
+entrambi i corpus richiedono circa 15 secondi sulle nostre macchine).
 
 ## Training
 
@@ -51,11 +50,11 @@ in successione alle tre funzioni seguenti.
 La funzione `transition_counts` non solo conta le transizioni dei PoS presenti
 nelle frasi del corpus, ma assegna frequenza 1 anche a tutte le transizioni che
 non sono state osservate nel corpus. Questa procedura di smoothing previene
-situazioni in cui tutte le probabilità in una colonna della matrice hanno come risultato 0
-(quando le emissioni di una parola hanno probabilità positiva solo per certi
-tag e le transizioni dal tag precedente verso questi sono 0). Il risultato è un
-dizionario annidato, dove `counts[pos1][pos2]` è il numero di transizioni da
-`pos1` a `pos2`.
+situazioni in cui tutte le probabilità in una colonna della matrice hanno come
+risultato 0 (quando le emissioni di una parola hanno probabilità positiva solo
+per certi tag e le transizioni dal tag precedente verso questi sono 0). Il
+risultato è un dizionario annidato, dove `counts[pos1][pos2]` è il numero di
+transizioni da `pos1` a `pos2`.
 
 ```python
 counts = {
@@ -80,17 +79,17 @@ l'ultimo argomento otteniamo una funzione che accetta `dict` ed esegue
 
 Infine, `transpose` effettua una trasposizione del dizionario, per rendere più
 semplice l'accesso alle probabilità durante il decoding: tramite
-`transitions[pos]` possiamo accedere a tutte le probabilità di arrivare a `pos`
-da ogni PoS di partenza, mentre con `emissions[token]` otteniamo le probabilità
-di generare `token` a partire da ogni PoS.
+`transitions[pos]` possiamo accedere al dizionario con tutte le probabilità di
+arrivare a `pos` da ogni PoS di partenza, mentre con `emissions[token]`
+otteniamo le probabilità di generare `token` a partire da ogni PoS.
 
 ### Smoothing
 
 Lo smoothing per le emissioni non presenti è stato gestito modificando il
 dizionario delle emissioni in modo che `emissions[token]` per un `token` non
 incontrato nel training restituisca un dizionario di probabilità scelte
-in base alla tecnica di smoothing che si vuole utilizzare. I dizionari di
-probabilità per ogni tecnica di smoothing usata sono in `tagger/smoothing.py`.
+in base alla tecnica di smoothing da usare. I dizionari di probabilità per ogni
+tecnica di smoothing sono in `tagger/smoothing.py`.
 
 ```python
 ALWAYS_NOUN = { 'NOUN': log(1) }
@@ -147,15 +146,16 @@ def pos_tags(self, tokens: list[str]):
         path = [max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])]
 ```
 
-Per lavorare con i vettori, abbiamo usato la funzione di utilità `sum_values`,
-che somma i valori di due dizionari che hanno la stessa chiave. È da notare che
-questa funzione salta i valori che si trovano in un dizionario, ma non
-nell'altro. In questo modo possiamo gestire gli zeri: per come abbiamo
-calcolato le probabilità, se un elemento non è presente nel corpus, non è
-neanche presente nei dizionari di probabilità. Possiamo quindi saltarli dato
-che comunque, moltiplicandoli, darebbero zero (nel caso dei logaritmi e della
-somma, andremmo a sommare un valore con $-\infty$, ottenendo lo stesso
-risultato).
+Le matrici di Viterbi e dei backpointer sono rappresentate come liste di
+dizionari, dove ogni dizionario rappresenta una colonna. Per lavorare con i
+vettori, abbiamo usato la funzione di utilità `sum_values`, che somma i valori
+di due dizionari che hanno la stessa chiave. È da notare che questa funzione
+salta i valori che si trovano in un dizionario, ma non nell'altro. In questo
+modo possiamo gestire gli zeri: per come abbiamo calcolato le probabilità, se
+un elemento non è presente nel corpus, non è neanche presente nei dizionari di
+probabilità. Possiamo quindi saltarli dato che comunque, moltiplicandoli,
+darebbero zero (nel caso dei logaritmi e della somma, andremmo a sommare un
+valore con $-\infty$, ottenendo lo stesso risultato).
 
 In `_next_col`, calcoliamo il valore di una colonna partendo dalla colonna
 precedente e dal token in entrata. Per farlo, andiamo a considerare ogni
@@ -163,8 +163,9 @@ PoS[^2] e le probabilità di transizione a quel PoS, e le moltiplichiamo con la
 colonna precedente. Otteniamo così un dizionario che contiene come chiavi tutti
 i possibili PoS di partenza per arrivare al PoS che stiamo considerando, e come
 valori le rispettive probabilità. Scegliamo quindi, dal dizionario ottenuto, la
-voce con probabilità più alta e la memorizziamo nel backpointer e nella matrice di viterbi. Infine moltiplichiamo il
-risultato con le probabilità di emissione del token.
+voce con probabilità più alta e la memorizziamo nel backpointer e nella matrice
+di Viterbi. Infine moltiplichiamo il risultato con le probabilità di emissione
+del token.
 
 [^2]: Ci limitiamo a iterare sui PoS presenti in `emissions[token]`, dato che
 gli altri avranno sempre probabilità 0.
@@ -205,17 +206,20 @@ performance, dove ogni tagger utilizza una tecnica di smoothing differente:
 - Assegno alle parole sconosciute le probabilità di emissione delle parole
   che appaiono una volta sola nel corpus
 
-La funzione `test_performance` effettua il calcolo delle performance per ogni
-tagger, calcolando le accuracy di ogni tagger nel corpus di riferimento.
+La baseline con cui li andiamo a paragonare usa sempre il PoS più
+frequentemente usato nel corpus per ogni parola, e PROPN quando incontra una
+parola sconosciuta.
 
-Come parte opzionale della consegna, veniva proposto di effettuare il confronto anche
-con un tagger MEMM. Per mancanza di risorse non siamo riusciti a eseguire
+Come parte opzionale della consegna, veniva proposto di effettuare il confronto
+anche con un tagger MEMM. Per mancanza di risorse non siamo riusciti a eseguire
 l'implementazione proposta sull'intero corpus (poca RAM). Siamo stati in grado
 di eseguire il tagger MEMM su di un 10% del corpus latino, e in quel caso nel
 test offriva un accuracy di circa il 33%, ma non ci è sembrato un dato
 confrontabile con gli altri.
 
 ## Performance
+
+### Greco
 
 ![Accuratezza dei tagger nel corpus in greco.](../grc_perseus.svg){width=70%}
 
@@ -229,11 +233,13 @@ Baseline                          61.65%
 
 Sul corpus greco la performance media dei tagger HMM è del 75.04%.
 La performance migliore è stata ottenuta dal tagger che ha etichettato le
-parole sconosciute come nomi o verbi (NOUN|VERB), seguito dal tagger che ha
+parole sconosciute come nomi o verbi (NOUN | VERB), seguito dal tagger che ha
 assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
 corpus (STATS). I tagger NOUN e UNIFORM invece si discostano dagli altri due
 ottenendo performance più basse. Tutti i tagger hanno ottenuto prestazioni
 migliori rispetto alla baseline.
+
+### Latino
 
 ![Accuratezza dei tagger nel corpus in latino.](../la_llct.svg){width=70%}
 
@@ -249,29 +255,33 @@ La performance media dei tagger sul corpus latino è del 96.46%. In questo caso
 la performance migliore è stata raggiunta dal tagger STATS con il 97,22% di
 precisione. 
 
-Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
+Seguono rispetto alle performance i tagger UNIFORM, NOUN | VERB e
 infine NOUN. Notiamo che il tagger STATS è stato l'unico a superare la
 baseline, mentre gli altri tagger hanno avuto performance più basse. 
 
 La baseline sul corpus latino è molto più alta della baseline sul corpus greco.
-Per questo motivo, sul corpus latino è stato difficile superare la baseline, mentre per il
-corpus greco è stato molto più semplice.
+Per questo motivo nel corpus latino è stato difficile superare la baseline,
+mentre nel corpus greco è stato molto più semplice.
 
-L'utilizzo di tecniche di smoothing sul corpus latino,
-non ci ha garantito prestazioni migliori: Solo un tagger ha superato la baseline e ha migliorato le prestazioni, 
-gli altri tagger le hanno peggiorate. 
-Sul corpus greco, lo smoothing non solo ci ha garantito prestazioni migliori, 
-ma i miglioramenti sono stati sostanziali. 
+L'utilizzo di tecniche di smoothing sul corpus latino non ha sempre garantito
+prestazioni migliori: solo un tagger ha superato la baseline e ha migliorato le
+prestazioni, mentre gli altri tagger le hanno peggiorate. Sul corpus greco lo
+smoothing non solo ha sempre garantito prestazioni migliori, ma i miglioramenti
+sono stati sostanziali.
 
 In media la differenza di prestazioni tra i tagger e la baseline 
 è del +13,42% sul corpus greco mentre è del -1,48% sul corpus latino.
 
-Possiamo dire che se la baseline ha una percentuale relativamente bassa, anche tecniche di smoothing semplici portano a migliormenti
-delle prestazioni. Se le percentuali della baseline sono alte, tecniche poco raffinate possono portare a dei peggioramenti. 
-All'aumentare della baseline quindi, sono necessarie tecniche di smoothing sempre più raffinate 
-per aumentare le performance del sistema.
+Possiamo dire che se la baseline ha una percentuale relativamente bassa, anche
+tecniche di smoothing semplici portano a miglioramenti delle prestazioni. Se le
+percentuali della baseline sono alte, tecniche poco raffinate possono portare a
+dei peggioramenti. All'aumentare della baseline quindi, sono necessarie
+tecniche di smoothing sempre più raffinate per aumentare le performance del
+sistema.
 
 ## Errori più comuni
+
+### Latino
 
 \begin{center}
 \begin{tabular}{|rll|rll|}
@@ -337,19 +347,21 @@ parole apparse una sola volta, fino al 48% se etichettiamo le parole
 sconosciute sempre come NOUN. 
 
 Negli errori più comuni commessi nella baseline, PROPN non è elencato. 
-Ovvero è raro che il tagger faccia un errata predizione sui PROPN. 
-Questo perché senza effettuare smoothing,
-il tagger tende a etichettare le parole sconosciute come PROPN.
+Ovvero è raro che il tagger faccia un errata predizione sui PROPN. Questo
+perché senza effettuare smoothing, il tagger tende a etichettare le parole
+sconosciute come PROPN.
 
 In generale lo smoothing ha diminuito l'errore su VERB, DET e NOUN ma l'ha
 aumentato su PROPN, tant'è che il tagger che ha ottenuto il 48% di errore su
 PROPN ha un accuracy al di sotto della baseline.
 
 Vediamo infine che il tagger migliore è quello che ha saputo contenere gli
-errori sui nomi propri, l'errore di cui soffrono  di più i tagger che
-utilizzano tecniche di smoothing.
+errori sui nomi propri, l'errore di cui soffrono di più i tagger che utilizzano
+altre tecniche di smoothing.
 
 \newpage
+
+### Greco
 
 \begin{center}
 \begin{tabular}{|rll|rll|}
@@ -405,12 +417,14 @@ Sul corpus greco la baseline commette errori maggiormente su NOUN e VERB con il
 variabili.
 
 Etichettando le parole sconosciute come nomi, effettuiamo più errori sui verbi 
-alzandone la percentuale di errore. Pur avendo una percentuale di errore sui verbi del 35% 
-commettiamo un errore bassissimo sui nomi migliorando l'accuracy. Si passa dal 61% al 73%. 
+alzandone la percentuale di errore. Pur avendo una percentuale di errore sui
+verbi del 35% commettiamo un errore bassissimo sui nomi migliorando l'accuracy.
+Si passa dal 61% al 73%. 
 
 Le  performance migliori si ottengono etichettando le parole sconosciute come
-nomi o verbi. In questo modo pur aumentando la percentuale di errore sugli avverbi,
-miglioriamo quelle su nomi e verbi raggiungendo l'accuratezza del 76,46%. 
+nomi o verbi. In questo modo pur aumentando la percentuale di errore sugli
+avverbi, miglioriamo quelle su nomi e verbi raggiungendo l'accuratezza del
+76,46%. 
 
 In generale vediamo che con le altre tecniche di smoothing, abbassando l'errore
 sui nomi e sui verbi, si alza la percentuale di errore sugli avverbi. 
