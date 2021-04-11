@@ -26,7 +26,7 @@ Per implementare il tagger abbiamo creato una classe `HMMTagger` (in
 probabilità di transizione ed emissione. Come struttura dati per rappresentare
 vettori e matrici abbiamo usato i dizionari. In questo modo non abbiamo
 sfruttato la vettorizzazione delle operazioni, ma siamo comunque rimasti
-soddisfatti dalla performance dell'algoritmo (aneddoticamente, l'addestramento
+soddisfatti dalla performance dell'algoritmo (l'addestramento
 e il test su entrambi i corpus richiedono circa 15 secondi sulle nostre
 macchine).
 
@@ -51,7 +51,7 @@ in successione alle tre funzioni seguenti.
 La funzione `transition_counts` non solo conta le transizioni dei PoS presenti
 nelle frasi del corpus, ma assegna frequenza 1 anche a tutte le transizioni che
 non sono state osservate nel corpus. Questa procedura di smoothing previene
-situazioni in cui tutte le probabilità in una colonna della matrice vanno a 0
+situazioni in cui tutte le probabilità in una colonna della matrice hanno come risultato 0
 (quando le emissioni di una parola hanno probabilità positiva solo per certi
 tag e le transizioni dal tag precedente verso questi sono 0). Il risultato è un
 dizionario annidato, dove `counts[pos1][pos2]` è il numero di transizioni da
@@ -163,7 +163,7 @@ PoS[^2] e le probabilità di transizione a quel PoS, e le moltiplichiamo con la
 colonna precedente. Otteniamo così un dizionario che contiene come chiavi tutti
 i possibili PoS di partenza per arrivare al PoS che stiamo considerando, e come
 valori le rispettive probabilità. Scegliamo quindi, dal dizionario ottenuto, la
-voce con probabilità più alta, che memorizziamo, e infine moltiplichiamo il
+voce con probabilità più alta e la memorizziamo nel backpointer e nella matrice di viterbi. Infine moltiplichiamo il
 risultato con le probabilità di emissione del token.
 
 [^2]: Ci limitiamo a iterare sui PoS presenti in `emissions[token]`, dato che
@@ -208,7 +208,7 @@ performance, dove ogni tagger utilizza una tecnica di smoothing differente:
 La funzione `test_performance` effettua il calcolo delle performance per ogni
 tagger, calcolando le accuracy di ogni tagger nel corpus di riferimento.
 
-Come parte opzionale della consegna, veniva proposto di fare il confronto anche
+Come parte opzionale della consegna, veniva proposto di effettuare il confronto anche
 con un tagger MEMM. Per mancanza di risorse non siamo riusciti a eseguire
 l'implementazione proposta sull'intero corpus (poca RAM). Siamo stati in grado
 di eseguire il tagger MEMM su di un 10% del corpus latino, e in quel caso nel
@@ -227,7 +227,7 @@ HMM: 1/#PosTags                   73.96%
 HMM: Always NOUN                  73.62%
 Baseline                          61.65%
 
-Sul corpus greco notiamo che la performance media dei tagger HMM è del 75.04%.
+Sul corpus greco la performance media dei tagger HMM è del 75.04%.
 La performance migliore è stata ottenuta dal tagger che ha etichettato le
 parole sconosciute come nomi o verbi (NOUN|VERB), seguito dal tagger che ha
 assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
@@ -247,19 +247,24 @@ HMM: Always NOUN                  95.98%
 
 La performance media dei tagger sul corpus latino è del 96.46%. In questo caso
 la performance migliore è stata raggiunta dal tagger STATS con il 97,22% di
-precisione. Seguono rispetto alle performance il tag UNIFORM, NOUN|VERB e
+precisione. Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
 infine NOUN. Notiamo che il tagger STATS è stato l'unico a superare la
 baseline, mentre gli altri tagger hanno avuto performance più basse. 
 
-Possiamo vedere come le performance medie dei tagger sul corpus latino sono
-molto più alte rispetto alla media sul corpus greco. La baseline sul corpus
-latino allo stesso modo è molto più alta della baseline sul corpus greco. Sul
-corpus latino infatti è stato difficile superare la baseline mentre per il
-corpus greco è stato molto più semplice. Sul corpus latino La differenza di
-accuracy tra la baseline e i tagger che hanno effettuato smoothing è molto
-piccola, sul corpus greco invece è molto ampia. Ciò  vuol dire che i tipi di
-smoothing utilizzati nel contesto della lingua greca sono stati molto più
-funzionali.
+La baseline sul corpus latino è molto più alta della baseline sul corpus greco.
+Per questo motivo, sul corpus latino è stato difficile superare la baseline, mentre per il
+corpus greco è stato molto più semplice.
+L'utilizzo di tecniche di smoothing sul corpus latino,
+non ci ha garantito prestazioni migliori: Solo un tagger ha superato la baseline e ha migliorato le prestazioni, 
+gli altri tagger le hanno peggiorate. 
+Sul corpus greco, lo smoothing non solo ci ha garantito prestazioni migliori, 
+ma i miglioramenti sono stati sostanziali. 
+In media la differenza di prestazioni tra i tagger e la baseline 
+è del +13,42% sul corpus greco mentre è del -1,48% sul corpus latino.
+Possiamo dire che per baseline basse anche tecniche di smoothing  semplici migliorano
+le prestazioni, per baseline alte tecniche poco raffinate possono portare a dei peggioramenti. 
+All'aumentare della baseline quindi, sono necessarie tecniche di smoothing sempre più raffinate 
+per aumentare le performance del sistema.
 
 ## Errori più comuni
 
