@@ -68,7 +68,8 @@ def plot_accuracies(corpus: Corpus, accuracies: list[float]):
     ax.set_xticklabels(labels)
 
     ax.bar_label(rects, padding=5)
-    plt.show()
+    plt.plot()
+    plt.savefig(f"{corpus.name}.svg")
 
 
 def main():
