@@ -3,24 +3,28 @@ from typing import Mapping, List
 
 from resources import Corpus
 from tagger.abc import PosTagger
-from utils import DictWithMissing
 
 
 def create_baseline_model(counts: Mapping[str, Mapping[str, int]]):
-    model = DictWithMissing(
-        (form, max(pos_counts.keys(), key=lambda pos: pos_counts[pos]))
+    model = {
+        form: max(pos_counts.keys(), key=lambda pos: pos_counts[pos])
         for form, pos_counts in counts.items()
-    )
-    model.missing = 'PROPN'
+    }
     return model
 
 
 class BaselineTagger(PosTagger):
     def __init__(self, model):
         self.model: Mapping[str, str] = model
+        self.missing = None
 
     def pos_tags(self, tokens: List[str]):
-        return [self.model[tok] for tok in tokens]
+        return [self.model.get(tok, self.missing) for tok in tokens]
+
+    def with_default_for_missing(self, pos):
+        b = BaselineTagger(self.model)
+        b.missing = pos
+        return b
 
     @classmethod
     def train(cls, corpus: Corpus):

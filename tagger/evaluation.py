@@ -41,7 +41,14 @@ def total_test_tokens(corpus):
 
 
 def plot_accuracies(corpus: Corpus, accuracies: list[float]):
-    labels = ["BASELINE", "NOUN", "NOUN | VERB", "UNIFORM", "STATS"]
+    labels = [
+        "BL NOUN",
+        "BL PROPN",
+        "NOUN",
+        "NOUN | VERB",
+        "UNIFORM",
+        "STATS",
+    ]
     data = [x * 100 for x in accuracies]
 
     x = np.arange(len(labels))
@@ -76,8 +83,10 @@ def main():
 
     for corpus in (Corpus.latin(), Corpus.greek()):
         hmm = HMMTagger.train(corpus)
+        baseline = BaselineTagger.train(corpus)
         taggers = [
-            BaselineTagger.train(corpus),
+            baseline.with_default_for_missing("NOUN"),
+            baseline.with_default_for_missing("PROPN"),
             hmm.with_unknown_emissions(ALWAYS_NOUN),
             hmm.with_unknown_emissions(NOUN_OR_VERB),
             hmm.with_unknown_emissions(UNIFORM),
@@ -85,7 +94,8 @@ def main():
         ]
 
         tagger_names = [
-            "Baseline",
+            "Baseline (NOUN)",
+            "Baseline (PROPN)",
             "HMM: Always NOUN",
             "HMM: 0.5 NOUN, 0.5 VERB",
             "HMM: 1/#PosTags",
@@ -125,7 +135,7 @@ def main():
                         for (predicted, correct), err_count in errors.most_common(5)
                     ],
                     headers=["Errori", "Corretto", "Predetto"],
-                    floatfmt=".2%"
+                    floatfmt=".2%",
                 )
             )
 
