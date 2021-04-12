@@ -272,8 +272,8 @@ Anche in questo caso tutti i tagger HMM hanno superato la baseline.
 
 \begin{tabular}{|rll|rll|rll|}
   \multicolumn{3}{c}{HMM: 0.5 NOUN, 0.5 VERB} &
-  \multicolumn{3}{c}{HMM: 1/\#PosTags} &
-  \multicolumn{3}{c}{HMM: Stats on occurring once} \\
+  \multicolumn{3}{c}{HMM: UNIFORM} &
+  \multicolumn{3}{c}{HMM: STATS} \\
 \hline
    Errori & Corretto   & Predetto    &
    Errori & Corretto   & Predetto    &
@@ -299,9 +299,8 @@ Anche in questo caso tutti i tagger HMM hanno superato la baseline.
 \end{center}
 
 Dalle tabelle degli errori più comuni per il corpus latino, possiamo vedere
-nella baseline si riscontra una percentuale di errore molto alta sulla
+che nella baseline si riscontra una percentuale di errore molto alta sulla
 predizione di PROPN. 
-
 
 Al variare delle tecniche di smoothing, gli errori diminuiscono. Il tagger
 Always NOUN, nonostante commetta una quantità di errori su PROPN più alta
@@ -348,8 +347,8 @@ smoothing più raffinata rispetto alle altre.
 
 \begin{tabular}{|rll|rll|rll|}
   \multicolumn{3}{c}{HMM: 0.5 NOUN, 0.5 VERB} &
-  \multicolumn{3}{c}{HMM: 1/\#PosTags} &
-  \multicolumn{3}{c}{HMM: Stats on occurring once} \\
+  \multicolumn{3}{c}{HMM: UNIFORM} &
+  \multicolumn{3}{c}{HMM: STATS} \\
 \hline
    Errori & Corretto   & Predetto    &
    Errori & Corretto   & Predetto    &
@@ -379,7 +378,7 @@ sono su VERB e ADV con rispettivamente il 35% e il 20% di prevalenza.
 
 I tagger HMM hanno diminuito di molto gli errori effettuati sul PoS VERB, ad
 eccezione del tagger Always NOUN. Questo tagger sembra aver aumentato
-sensibilmente gli errori su VERB e ADJ diminuendo l'errore compiuto sugli altri
+sensibilmente gli errori su VERB, ADJ e PRON diminuendo l'errore compiuto sugli altri
 POS.
 
 Il tagger Always NOUN è quello che si discosta meno dalla baseline, ottenendo
@@ -390,10 +389,10 @@ rappresentato in tabella) ma ha peggiorato le prestazioni sul tag NOUN. In
 particolare ha ottenuto un errore del 22,7% su NOUN e ha percentuali simili
 anche per ADV. 
 
-Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse
-rispetto a tutti i POS, ma questo non l'ha reso il tagger migliore. Anche per
-questo tagger, come in STATS, le percentuali di errore più alte sono sui PoS
-NOUN e ADV.
+Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse guardando la tabella, 
+ma questo non l'ha reso il tagger migliore. 
+Anche per questo tagger, come in STATS, 
+le percentuali di errore più alte sono sui PoS NOUN e ADV.
 
 Il tagger migliore risulta essere NOUN | VERB la cui percentuale di errore
 maggiore è su ADV. Questo tagger ha raggiunto un accuracy molto simile al
