@@ -1,10 +1,9 @@
 from collections import Counter
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 import tabulate
-import matplotlib.ticker as mtick
-import toolz
 
 from resources import Corpus
 from tagger.abc import PosTagger
@@ -42,9 +41,6 @@ def total_test_tokens(corpus):
     )
 
 
-cm = 1 / 2.54
-
-
 def plot_accuracies(accuracies: dict[str, list[float]]):
     labels = [
         "BASELINE",
@@ -56,14 +52,18 @@ def plot_accuracies(accuracies: dict[str, list[float]]):
     x = np.arange(len(labels))
     width = 0.35
 
+    cm = 1 / 2.54
     fig, axs = plt.subplots(1, 2, figsize=(22 * cm, 10 * cm))
 
     for ax, (corpus_name, corpus_accuracies) in zip(axs, accuracies.items()):
 
-        sorted_acc = sorted(zip(corpus_accuracies, labels))
-        acc, lb = [[x[0] for x in sorted_acc], [x[1] for x in sorted_acc]]
+        sorted_acc_and_labels = sorted(zip(corpus_accuracies, labels))
+        sorted_acc, sorted_labels = [
+            [x[0] for x in sorted_acc_and_labels],
+            [x[1] for x in sorted_acc_and_labels],
+        ]
 
-        data = [x * 100 for x in acc]
+        data = [x * 100 for x in sorted_acc]
         rects = ax.bar(x, data, width)
 
         if corpus_name == "la_llct":
@@ -71,18 +71,17 @@ def plot_accuracies(accuracies: dict[str, list[float]]):
         else:
             ax.set(ylim=[50, 100])
 
-        # Add some text for labels, title and custom x-axis tick labels, etc.
         if corpus_name == "la_llct":
             ax.set_ylabel("Accuracy")
 
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
         ax.set_title(corpus_name)
         ax.set_xticks(x)
-        ax.set_xticklabels(lb)
+        ax.set_xticklabels(sorted_labels)
 
         ax.bar_label(rects, fmt="%.2f", padding=5)
-    plt.plot()
-    plt.savefig('accuracies.svg')
+
+    plt.show()
 
 
 def main():
@@ -149,7 +148,6 @@ def main():
                     ],
                     headers=["Errori", "Corretto", "Predetto"],
                     floatfmt=".2%",
-                    tablefmt="latex",
                 )
             )
 
