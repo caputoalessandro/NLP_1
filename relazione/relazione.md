@@ -125,25 +125,30 @@ La funzione `pos_tags` è divisa in quattro parti:
   dallo stato finale con probabilità massima.
 
 ```python
-def pos_tags(self, tokens: list[str]):
-
+    def pos_tags(self, tokens: list[str]):
         transitions, emissions = self.transitions, self.emissions
 
         # Prima colonna
-        viterbi = [sum_values(get_row(transitions, "Q0"), emissions[tokens[0]])]
+        viterbi = [
+            sum_values(get_row(transitions, "Q0"), emissions[tokens[0]])
+        ]
         backptr = []
 
-        # Colonne centrali 
+        # Colonne centrali
         for token in tokens[1:]:
             next_viterbi, next_backptr = self._next_col(viterbi[-1], token)
+
             viterbi.append(next_viterbi)
             backptr.append(next_backptr)
 
-        # Ultima colonna
+        # Ultima colonna 
         viterbi.append(sum_values(viterbi[-1], transitions["Qf"]))
 
         # Path
         path = [max(viterbi[-1].keys(), key=lambda k: viterbi[-1][k])]
+        ... # segui backptr
+
+        return path
 ```
 
 Le matrici di Viterbi e dei backpointer sono rappresentate come liste di
@@ -171,26 +176,24 @@ del token.
 gli altri avranno sempre probabilità 0.
 
 ```python
-def _next_col(self, last_col, token):
+    def _next_col(self, last_col, token):
 
-    transitions, emissions = self.transitions, self.emissions
+        transitions, emissions = self.transitions, self.emissions
 
-    viterbi = {}
-    backptr = {}
+        viterbi = {}
+        backptr = {}
 
-    for pos in emissions[token].keys():
+        for pos in emissions[token].keys():
+            paths_to_pos = sum_values(last_col, transitions[pos])
 
-        # calcolo tutti  i percorsi che vanno  dal pos precedente al pos odierno
-        paths_to_pos = sum_values(last_col, transitions[pos])
+            # tra tutti i path scelgo quello con probabilità massima
+            backptr[pos], viterbi[pos] = max(
+                paths_to_pos.items(), key=lambda it: it[1]
+            )
 
-        # tra tutti i  path scelgo quello con probabilità maggiore
-        backptr[pos], viterbi[pos] = max(paths_to_pos.items(), key=lambda it: it[1])
-
-    # crea colonna
-    viterbi = sum_values(viterbi, emissions[token])
-    
-    return viterbi, backptr
-
+        # aggiungo emissioni
+        viterbi = sum_values(viterbi, emissions[token])
+        return viterbi, backptr
 ```
 
 
@@ -203,12 +206,12 @@ performance, dove ogni tagger utilizza una tecnica di smoothing differente:
 - Considero le parole sconosciute come nomi
 - Considero le parole sconosciute come nomi o verbi
 - Assegno alle parole sconosciute ogni PoS tag con una probabilità uniforme 
-- Assegno alle parole sconosciute le probabilità di emissione delle parole
-  che appaiono una volta sola nel corpus
+- Assegno alle parole sconosciute le probabilità dei PoS delle parole che
+  appaiono una volta sola nel corpus
 
-La baseline con cui li andiamo a paragonare usa sempre il PoS più
-frequentemente usato nel corpus per ogni parola, e PROPN quando incontra una
-parola sconosciuta.
+La baseline con cui li andiamo a paragonare restituisce sempre il PoS più
+frequentemente incontrato nel corpus per ogni parola, e NOUN quando incontra
+una parola sconosciuta.
 
 Come parte opzionale della consegna, veniva proposto di effettuare il confronto
 anche con un tagger MEMM. Per mancanza di risorse non siamo riusciti a eseguire
@@ -219,13 +222,13 @@ confrontabile con gli altri.
 
 ## Performance
 
-![Accuracy dei tagger nei corpus.](../accuracies.svg)
+![Accuracy dei tagger nei corpus.](accuracies.svg)
 
 Sul corpus greco la performance media dei tagger HMM è del 75.04%.
 La performance migliore è stata ottenuta dal tagger che ha etichettato le
 parole sconosciute come nomi o verbi (NOUN | VERB), seguito dal tagger che ha
-assegnato alle parole sconosciute i tag delle parole apparse una sola volta nel
-corpus (STATS). 
+assegnato alle parole sconosciute le probabilità dei PoS delle parole apparse
+una sola volta nel corpus (STATS). 
 
 I tagger NOUN e UNIFORM invece si discostano dagli altri due
 ottenendo performance più basse. Tutti i tagger hanno ottenuto prestazioni
@@ -235,8 +238,8 @@ La performance media dei tagger sul corpus latino è del 96.46%. In questo caso
 la performance migliore è stata raggiunta dal tagger STATS con il 97,22% di
 precisione. 
 
-Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e
-infine NOUN. Anche in questo caso tutti i tagger HMM hanno superato la baseline.
+Seguono rispetto alle performance i tagger UNIFORM, NOUN|VERB e infine NOUN.
+Anche in questo caso tutti i tagger HMM hanno superato la baseline.
 
 ## Errori più comuni
 
@@ -250,19 +253,19 @@ infine NOUN. Anche in questo caso tutti i tagger HMM hanno superato la baseline.
    Errori & Corretto   & Predetto   &
    Errori & Corretto   & Predetto   \\
 \hline
-   16.51\% & VERB       & AUX        &
+   42.10\% & PROPN      & NOUN       &
    48.19\% & PROPN      & NOUN       \\
 
-   16.51\% & DET        & PRON       &
+   11.38\% & VERB       & AUX        &
    12.41\% & VERB       & NOUN       \\
 
-   16.12\% & NOUN       & PROPN      &
+   11.38\% & DET        & PRON       &
     8.27\% & VERB       & AUX        \\
 
-   15.73\% & VERB       & PROPN      &
+   10.84\% & VERB       & NOUN       &
     8.27\% & ADJ        & NOUN       \\
 
-   10.35\% & ADJ        & PROPN      &
+    7.32\% & ADJ        & NOUN       &
     3.31\% & ADV        & CCONJ      \\
 \hline
 \end{tabular}
@@ -295,22 +298,26 @@ infine NOUN. Anche in questo caso tutti i tagger HMM hanno superato la baseline.
 \end{tabular}
 \end{center}
 
-Dalle tabelle degli errori più comuni per il corpus latino,  possiamo vedere che
-non utilizzando tecniche di smoothing, si riscontra una percentuale di errore molto
-alta sulla predizione di PROPN. 
+Dalle tabelle degli errori più comuni per il corpus latino, possiamo vedere
+nella baseline si riscontra una percentuale di errore molto alta sulla
+predizione di PROPN. 
 
-Utilizzando tecniche di smoothing in generale gli errori commessi su PROPN sono diminuiti,
-ma non per tutti i tagger. Il tagger always NOUN, nonostante commetta una quantità di errori su PROPN
-più alta rispetto alla baseline (passando dal 42% al 48%), diminuisce gli errori di predizione su tutti gli altri POS
-aumentando comunque l'accuracy.
+
+Al variare delle tecniche di smoothing, gli errori diminuiscono. Il tagger
+Always NOUN, nonostante commetta una quantità di errori su PROPN più alta
+rispetto alla baseline (passando dal 42% al 48%), diminuisce gli errori di
+predizione su tutti gli altri POS, aumentando comunque l'accuracy.
  
-Gli errori più comuni dei tagger UNIFORM e NOUN|VERB sono stati principalmente due, etichettare i nomi propri 
-come nomi o come verbi. Le percentuali di errore sono state  comunque molto più basse rispetto alla baseline arrivando ad
-un accuracy del 96,23% per NOUN|VERB e 96,42% per UNIFORM.
+Gli errori più comuni dei tagger UNIFORM e NOUN | VERB sono stati
+principalmente due, etichettare i nomi propri come nomi o come verbi. Le
+percentuali di errore sono state  comunque molto più basse rispetto alla
+baseline arrivando ad un accuracy del 96,23% per NOUN | VERB e 96,42% per
+UNIFORM.
 
-Infine, il tagger STATS si è dimostrato il tagger migliore per la lingua latina in questo esperimento, 
-arrivando a una percentuale del 97,22%. Ciò è in linea con le aspettative, essendo il tagger che ha utilizzato 
-una tecnica di smoothing più raffinata rispetto alle altre.
+Infine, il tagger STATS si è dimostrato il tagger migliore per la lingua latina
+in questo esperimento, arrivando a una percentuale del 97,22%. Ciò è in linea
+con le aspettative, essendo il tagger che ha utilizzato una tecnica di
+smoothing più raffinata rispetto alle altre.
 
 ### Greco
 
@@ -322,15 +329,19 @@ una tecnica di smoothing più raffinata rispetto alle altre.
    Errori & Corretto   & Predetto   &
    Errori & Corretto   & Predetto   \\
 \hline
-   30.96\% & NOUN       & PROPN      &
+   35.59\% & VERB       & NOUN       &
    35.67\% & VERB       & NOUN       \\
-   24.46\% & VERB       & PROPN      &
+
+   20.09\% & ADV        & PART       &
    18.63\% & ADV        & PART       \\
-   13.87\% & ADV        & PART       &
+
+   15.50\% & ADJ        & NOUN       &
    15.61\% & ADJ        & NOUN       \\
-   10.30\% & ADJ        & PROPN      &
+
+    9.73\% & ADV        & CCONJ      &
     9.35\% & ADV        & CCONJ      \\
-    6.72\% & ADV        & CCONJ      &
+
+    7.24\% & PRON       & ADJ        &
     8.63\% & PRON       & ADJ        \\
 \hline
 \end{tabular}
@@ -363,29 +374,33 @@ una tecnica di smoothing più raffinata rispetto alle altre.
 \end{tabular}
 \end{center}
 
-Nella baseline calcolata sul corpus in  lingua greca, gli errori più comuni sono due,
-ovvero VERB e ADV con il 35% e il 20%.
+Nella baseline calcolata sul corpus in lingua greca, gli errori più comuni
+sono su VERB e ADV con rispettivamente il 35% e il 20% di prevalenza.
 
-I tagger che hanno utilizzato lo smoothing in generale hanno diminuito di molto 
-gli errori effettuati sul pos VERB, ad eccezzione del tagger always NOUN. Questo
-tagger sembra aver aumentato sensibilmente gli errori su VERB e ADJ diminuendo
-l'errore compiuto sugli altri POS.
+I tagger HMM hanno diminuito di molto gli errori effettuati sul PoS VERB, ad
+eccezione del tagger Always NOUN. Questo tagger sembra aver aumentato
+sensibilmente gli errori su VERB e ADJ diminuendo l'errore compiuto sugli altri
+POS.
 
-Il tagger always NOUN è quello che si discosta
-meno dalla baseline, ottenendo un accuracy del 73,62% rispetto al 73,52% della baseline.
+Il tagger Always NOUN è quello che si discosta meno dalla baseline, ottenendo
+un accuracy del 73,62% rispetto al 73,52% della baseline.
 
-Il tagger STATS ha diminuito moltissimo gli errori compiuti su VERB (infatti non è rappresentato in tabella)
-ma ha peggiorato le prestazioni sul tag NOUN. In partiolare ha ottenuto un errore del 22,7% su NOUN 
-e ha percetuali simili anche per ADV. 
+Il tagger STATS ha diminuito molto gli errori compiuti su VERB (infatti non è
+rappresentato in tabella) ma ha peggiorato le prestazioni sul tag NOUN. In
+particolare ha ottenuto un errore del 22,7% su NOUN e ha percentuali simili
+anche per ADV. 
 
-Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse rispetto a tutti i POS,
-ma questo non l'ha reso il tagger migliore. Anche per questo tagger come STATS le percentuali di 
-errore più alte sono sui pos NOUN e ADV.
+Il tagger UNIFORM sembra avere delle percentuali massime di errore più basse
+rispetto a tutti i POS, ma questo non l'ha reso il tagger migliore. Anche per
+questo tagger, come in STATS, le percentuali di errore più alte sono sui PoS
+NOUN e ADV.
 
-IL tagger migliore risulta essere NOUN|VERB la cui percentuale di errore maggiore è su ADV.
-Questo tagger ha raggiunto un accuracy molto simile al tagger STATS  ottenendo una percentuale del 76,47%.
+Il tagger migliore risulta essere NOUN | VERB la cui percentuale di errore
+maggiore è su ADV. Questo tagger ha raggiunto un accuracy molto simile al
+tagger STATS, ottenendo una percentuale del 76,47.
 
-In generale abbiamo visto come le percentuali di errore rispetto ai singoli POS siano diversamente distribuite
-da una lingua all'altra. Nella lingua latina si sono riscontrati errori maggiormente sui verbi e sui nomi propri. 
-Per il greco antico abbiamo ottenuto errori maggiori su verbi, avverbi e aggettivi.
+In generale abbiamo visto come le percentuali di errore rispetto ai singoli POS
+siano diversamente distribuite da una lingua all'altra. Nella lingua latina si
+sono riscontrati errori maggiormente sui verbi e sui nomi propri. Per il greco
+antico abbiamo ottenuto errori maggiori su verbi, avverbi e aggettivi.
 
